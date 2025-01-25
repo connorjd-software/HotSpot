@@ -1,45 +1,145 @@
 export const mapOptions = {
     styles: [
+        // Hide labels for all elements except towns, cities, and states
         {
-            featureType: 'administrative',
-            elementType: 'labels',
-            stylers: [{ visibility: 'on' }], // Show administrative labels (like state and city names)
+            "featureType": "all",
+            "elementType": "geometry.fill",
+            "stylers": [
+                {
+                    "visibility": "on"
+                }
+            ]
         },
         {
-            featureType: 'administrative.locality',
-            elementType: 'labels.text',
-            stylers: [{ visibility: 'on' }], // Show city names
+            "featureType": "all",
+            "elementType": "labels.text",
+            "stylers": [
+                {
+                    "visibility": "off"
+                }
+            ]
         },
         {
-            featureType: 'administrative.province',
-            elementType: 'labels.text',
-            stylers: [{ visibility: 'on' }], // Show state names
+            "featureType": "administrative",
+            "elementType": "labels.text",
+            "stylers": [
+                {
+                    "visibility": "on"
+                }
+            ]
         },
         {
-            featureType: 'poi',
-            stylers: [{ visibility: 'on' }], // Turn off points of interest
+            "featureType": "poi",
+            "elementType": "labels.icon",
+            "stylers": [
+                {
+                    "visibility": "off"
+                }
+            ]
         },
         {
-            featureType: "road",
-            elementType: "geometry",
-            stylers: [{ "visibility": 'on' }] // Show road geometry
+            "featureType": "poi",
+            "elementType": "labels.text",
+            "stylers": [
+                {
+                    "visibility": "off"
+                }
+            ]
         },
         {
-            featureType: 'road',
-            elementType: 'labels',
-            stylers: [{ visibility: 'on' }], // Turn off road labels
+            "featureType": "road",
+            "elementType": "labels",
+            "stylers": [
+                {
+                    "visibility": "off"
+                }
+            ]
         },
         {
-            featureType: 'transit',
-            stylers: [{ visibility: 'off' }], // Turn off transit labels
+            "featureType": "water",
+            "elementType": "labels",
+            "stylers": [
+                {
+                    "visibility": "off"
+                }
+            ]
         },
         {
-            featureType: 'water',
-            elementType: 'labels',
-            stylers: [{ visibility: 'off' }], // Turn off water labels
+            "featureType": "landscape",
+            "elementType": "labels",
+            "stylers": [
+                {
+                    "visibility": "off"
+                }
+            ]
         },
-    ],
-}
+        {
+            "featureType": "transit",
+            "elementType": "labels",
+            "stylers": [
+                {
+                    "visibility": "off"
+                }
+            ]
+        },
+        {
+            "featureType": "administrative.country",
+            "elementType": "labels.text",
+            "stylers": [
+                {
+                    "visibility": "on"
+                }
+            ]
+        },
+        {
+            "featureType": "administrative.province",
+            "elementType": "labels.text",
+            "stylers": [
+                {
+                    "visibility": "on"
+                }
+            ]
+        },
+        {
+            "featureType": "administrative.locality",
+            "elementType": "labels.text",
+            "stylers": [
+                {
+                    "visibility": "on"
+                }
+            ]
+        },
+        {
+            "featureType": "administrative.neighborhood",
+            "elementType": "labels.text",
+            "stylers": [
+                {
+                    "visibility": "on"
+                }
+            ]
+        },
+        {
+            "featureType": "poi.park",
+            "elementType": "labels.text",
+            "stylers": [
+                {
+                    "visibility": "off"
+                }
+            ]
+        },
+        // Optionally, you can keep labels for state boundaries or national parks, etc.
+        {
+            "featureType": "water",
+            "elementType": "geometry",
+            "stylers": [
+                {
+                    "color": "#84bde9"
+                }
+            ]
+        }
+    ]
+};
+
 
 export const stateCenters = [
     { name: 'Alabama', lat: 32.8067, lng: -86.7911 },
