@@ -61,10 +61,3 @@ const Login = () => {
 }
 
 export default Login;
-/*  <BrowserRouter>
-    <Routes>
-        <Route path='/signup' element={<SignUpForm/>}/>
-        <Route path='/login' element={<Login/>}/>
-        <Route path='/reset-password' element={<ResetPassword/>}/>
-    </Routes>
-    </BrowserRouter> */
