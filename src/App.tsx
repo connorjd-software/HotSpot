@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback } from 'react'
 import { GoogleMap, Libraries, useJsApiLoader } from '@react-google-maps/api'
+import SignUpForm from "./components/SignUpForm"
+import Login from "./components/Login"
+import ResetPassword from './components/ResetPassword'
+import {BrowserRouter, Routes, Route} from 'react-router-dom'
 
 // Define libraries outside the component to prevent reloading on each render
 const libraries: Libraries = ['places'];
