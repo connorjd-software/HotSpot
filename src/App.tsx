@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { mapOptions, stateCenters } from './MapOptions.ts'; // Import the options and state centers
 import './App.css';
@@ -9,6 +9,27 @@ const containerStyle = {
     height: '100vh',
 };
 
+interface Place{
+  lat: number,
+  lng: number,
+  name: string,
+  content: string,
+  time: number
+}
+
+//state markers for initial markers
+const statePlaces = stateCenters.map((sc) => {
+  return {
+     lat: sc.lat,
+     lng: sc.lng,
+     name: sc.name,
+     content: "state description",
+     time: 0,
+  } as Place
+
+ }
+)
+
 const App: React.FC = () => {
     // Load the Google Maps script using the hook
     const { isLoaded } = useJsApiLoader({
@@ -16,10 +37,14 @@ const App: React.FC = () => {
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
     });
 
-    const [selectedState, setSelectedState] = useState<any>(null);  // For storing selected state marker
+    const [selectedMarker, setSelectedMarker] = useState<Place|null>(null);
     const [center, setCenter] = useState({ lat: 39.8283, lng: -98.5795 });
     const [zoom, setZoom] = useState(4);  // Initialize zoom level
     const [map, setMap] = useState<google.maps.Map | null>(null);  // Store map instance
+    const [markers, setMarkers] = useState<Place[]>(statePlaces);
+    const [viewing, setViewing] = useState<boolean>(false);
+    const [viewedMarker, setviewedMarker] = useState<Place|null>(null);
+    const mapRef = useRef(null);
 
     // Handle zoom changes
     const onZoomChanged = useCallback(() => {
@@ -44,28 +69,46 @@ const App: React.FC = () => {
                 options={mapOptions}  // Pass map options (e.g., disable controls, etc.)
                 onLoad={onLoad}  // Handle map load event to get map instance
             >
-                {/* Markers for each state */}
-                {stateCenters.map((state) => (
+                  {markers.map((m) => (
                     <Marker
-                        key={state.name}
-                        position={{ lat: state.lat, lng: state.lng }}
-                        title={state.name}
-                        onClick={() => { setCenter({ lat: state.lat, lng: state.lng }); setZoom(8) }}  // Set the selected state on marker click
+                        key={m.name}
+                        position={{ lat: m.lat, lng: m.lng }}
+                        title={m.name}
+                        onMouseOver={() => {setSelectedMarker(m)}}  // Set the selected state on marker click
                     />
                 ))}
 
                 {/* Display InfoWindow when a state marker is clicked */}
-                {selectedState && (
+                {selectedMarker && (
                     <InfoWindow
-                        position={{ lat: selectedState.lat, lng: selectedState.lng }}
-                        onCloseClick={() => setSelectedState(null)}  // Close the InfoWindow when clicking the close button
+                        position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
+                        onCloseClick={() => {setSelectedMarker(null); setViewing(false)}}
+                        
                     >
-                        <div>
-                            <h3>{selectedState.name}</h3>
+                        <div onClick={() => {setViewing(true); setviewedMarker(selectedMarker)}}>
+                            <h3>{selectedMarker.name}</h3>
                         </div>
                     </InfoWindow>
                 )}
             </GoogleMap>
+            <div
+                style={{
+                    position: 'absolute',
+                    top: '5vh',
+                    right: viewing?'5vw': '-40vw',
+                    backgroundColor: 'white',
+                    padding: 10,
+                    height: '80vh',
+                    width: '30vw',
+                    overflowY: 'scroll',
+                    color: "black",
+                    transition: '1s'
+                }}
+            >   
+                <button onClick={() => setViewing(false)}>exit</button>
+                <h3>{viewedMarker?.name}</h3>
+                <p>{viewedMarker?.content}</p>
+            </div>
         </div>
     ) : (
         <div>Loading...</div>  // Show loading indicator while the map is loading
