@@ -35,6 +35,13 @@ const statePlaces = stateCenters.map((sc) => {
 )
 
 const App: React.FC = () => {
+    /*  <BrowserRouter>
+    <Routes>
+        <Route path='/signup' element={<SignUpForm/>}/>
+        <Route path='/login' element={<Login/>}/>
+        <Route path='/reset-password' element={<ResetPassword/>}/>
+    </Routes>
+    </BrowserRouter> */
     // Load the Google Maps script using the hook
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
