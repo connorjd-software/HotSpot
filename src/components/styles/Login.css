@@ -1,0 +1,107 @@
+/* Global container */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+.login-container {
+    display: flex; /* Enable Flexbox */
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+    min-height: 100vh; /* Full viewport height */
+    background-color: transparent; /* Light gray background */
+    width: 100vw;
+}
+
+/* Login card */
+.login-card {
+    width: 100%;
+    max-width: 400px; /* Restrict maximum width */
+    background-color: #ffffff; /* White background */
+    border-radius: 12px; /* Rounded corners */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    padding: 2rem; /* Internal padding */
+    text-align: center; /* Center-align text inside */
+}
+
+/* Title */
+.login-card h2 {
+    font-size: 1.75rem;
+    font-weight: bold;
+    color: #374151; /* Gray-700 */
+    margin-bottom: 1rem;
+}
+
+/* Input fields */
+.login-card label {
+    display: block;
+    text-align: left;
+    font-size: 0.875rem;
+    color: #6b7280; /* Gray-600 */
+    margin-bottom: 0.5rem;
+}
+
+.login-card input {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    color: #374151 /* Gray-700 */ !important;
+    background-color: #f9fafb /* Gray-100 */ !important;
+    border: 1px solid #d1d5db /* Gray-300 */;
+    border-radius: 8px;
+    outline: none;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.login-card input:focus {
+    border-color: #3b82f6; /* Blue-500 */
+    box-shadow: 0px 0px 0px 4px rgba(59, 130, 246, 0.25); /* Blue focus ring */
+}
+
+/* Buttons */
+.login-card button {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #3b82f6; /* Blue-500 */
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.login-card button:hover {
+    background-color: #2563eb; /* Blue-600 */
+}
+
+.login-card button:focus {
+    outline: none;
+    box-shadow: 0px 0px 0px 4px rgba(37, 99, 235, 0.25); /* Blue focus ring */
+}
+
+.login-card form {
+    margin-bottom: 10%;
+}
+
+/* Links */
+.login-card a {
+    color: #3b82f6; /* Blue-500 */
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+}
+
+.login-card a:hover {
+    text-decoration: underline;
+    color: #2563eb; /* Blue-600 */
+}
+
+.login-card p {
+    font-size: 0.875rem;
+    color: #6b7280; /* Gray-600 */
+    margin-top: 1rem;
+    text-transform: uppercase;
+}
