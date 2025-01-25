@@ -1,9 +1,13 @@
-import React, { useState, useCallback, useRef } from 'react';
-import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
-import { mapOptions, stateCenters } from './MapOptions.ts'; // Import the options and state centers
-import './App.css';
+import { useState, useEffect, useCallback } from 'react'
+import { GoogleMap, Libraries, useJsApiLoader } from '@react-google-maps/api'
+import SignUpForm from "./components/SignUpForm"
+import Login from "./components/Login"
+import ResetPassword from './components/ResetPassword'
+import {BrowserRouter, Routes, Route} from 'react-router-dom'
 
-// Define map container styles
+// Define libraries outside the component to prevent reloading on each render
+const libraries: Libraries = ['places'];
+
 const containerStyle = {
     width: '100%',
     height: '100vh',
