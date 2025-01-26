@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { writePost, readPost } from "./FireBase";
+import { writePost } from "./FireBase";
 import "./styles/PostForm.css";
 
 const PostForm: React.FC = () => {

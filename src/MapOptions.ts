@@ -3,8 +3,8 @@ export const mapOptions = {
         latLngBounds: {
             north: 49.384358, // Northernmost point of the contiguous US
             south: 24.396308, // Southernmost point of the contiguous US
-            west: -125.0, // Westernmost point of the contiguous US
-            east: -66.93457 // Easternmost point of the contiguous US
+            west: -145.0, // Westernmost point of the contiguous US
+            east: -46.93457 // Easternmost point of the contiguous US
         },
         strictBounds: false // Allow the user to pan outside the specified bounds (if needed)
     },
@@ -433,8 +433,9 @@ export const stateNameToAbbreviation = (stateName: string) => {
 export const filters = [
     "All",
     "Local",
-    "Real-estate",
-    "Sports",
-    "Finance",
+    "Travel",
+    "Environment",
+    "Health",
+    "LifeStyle",
     "Politics"
 ]
