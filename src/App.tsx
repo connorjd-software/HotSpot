@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect, ReactElement } from 'r
 import { GoogleMap, useJsApiLoader, Marker, InfoWindowF, Libraries } from '@react-google-maps/api';
 import { mapOptions, stateCenters, stateNameToAbbreviation } from './MapOptions';
 import Login from "./components/Login";
+import PostForm from './components/PostForm';
 import { NewsApp, NewsTitles } from './news'; // Import NewsApp component
 import axios from 'axios'; // Import axios for fetching news
 import './App.css';
@@ -20,6 +21,7 @@ import MoreIcon from '@mui/icons-material/More';
 import ClearIcon from '@mui/icons-material/Clear';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import BackpackIcon from '@mui/icons-material/Backpack';
+import CreateIcon from '@mui/icons-material/Create';
 
 import { readPost } from './components/FireBase';
 
@@ -83,11 +85,14 @@ const App: React.FC = () => {
         const [viewedArticles, setViewedArticles] = useState<any[]>([]);
         const [selectedFilter, setSelectedFilter] = useState<number>(0)
         const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+        const [isUser, setUser] = useState<boolean>(false);
         const [showPosts, setShowPosts] = useState<boolean>(false);
         const [postMarkers, setPostMarkers] = useState<Place[]>([]);
         const [nearbyIndex, setNearbyIndex] = useState<number>(0);
-        const [navbarToggled, setNavbarToggled] = useState<boolean>(true);
-
+        const [isPostFormVisible, setPostFormVisible] = useState(false);
+        const togglePostForm = () => {
+            setPostFormVisible((prev) => !prev); // Toggle the visibility state
+        };
         useEffect(() => {
             if (zoom < 10) {
                 setLocalityMarkers([]);
@@ -258,7 +263,7 @@ const App: React.FC = () => {
 
         return isLoaded ? (
             <div className="fade-in" style={{display:'flex'}} >
-                {!isLoggedIn && <Login setIsLoggedIn={setIsLoggedIn}></Login>}
+                {!isLoggedIn && <Login setIsLoggedIn={setIsLoggedIn} setUser={setUser}></Login>}
                 <div
                 style={{
                   position: 'relative',
@@ -274,10 +279,9 @@ const App: React.FC = () => {
                   transition:'1s',
                   zIndex:40
                 }}
-              >   
-                  <div style={{position:'absolute', left:'110px', color:'lightgray', zIndex: 10, top:'48vh', backgroundColor:'white', height:'40px', paddingTop:'7px', paddingLeft:'10px', borderRadius:'5px'}} onClick={() => setNavbarToggled(!navbarToggled)}>{navbarToggled?<ArrowBackIosNewIcon/>: <ArrowForwardIosIcon/>}</div>
-                  <div className="filters-container" style={{display:'flex', flexDirection: 'column', margin:'auto', width:"100%", justifyContent:"center", height:'100%', overflowY:'auto', overflowX:'hidden'}}>                    
-                  
+                >
+                
+                  <div className="filters-container" style={{display:'flex', flexDirection: 'column', margin:'auto', width:"100%", justifyContent:"center", height:'100%', overflowY:'auto', overflowX:'hidden'}}>
                   <div key={-1}
                               className={"filter-item "}
                               onClick={() => {
@@ -388,10 +392,8 @@ const App: React.FC = () => {
                             <GavelIcon/>
                         Politics
                     </div>
-
-
                   </div>
-              </div>
+                </div>
                 <div style={{width:"100%", right:"0px", position:"relative", display: 'flex'}}>
                 <div style={{ position: 'absolute', top: '20px', width: '90%', zIndex: 10, margin:'auto' }}>
                         <input
@@ -525,19 +527,72 @@ const App: React.FC = () => {
                         borderRadius:'10px'
                     }}
                 >
-                  <div style={{overflowY:'auto', height:'100%', justifyItems:'center', textAlign:'center'}}>
-                  <div onClick={() => setViewing(false)} style={{float:'right'}}><ClearIcon/></div>
-                    {
-                      showPosts? <>
-                        {nearbyList}
-                      </>:
-                      <>
-                      <h3>{viewedMarker?.name}</h3>
-                    <p>{viewedMarker?.content}</p>
-                    <NewsApp articles={viewedArticles} /> {/* Pass news articles to NewsApp */}
-                      </>
+                    <div style={{overflowY:'auto', height:'100%'}}>
+                    <button onClick={() => setViewing(false)}>exit</button>
+                        {
+                        showPosts? <>
+                            {nearbyMarkers.map((m) => {
+                            return (<div>
+                                <div>{m.name}</div>
+                                <div>{m.content}</div>
+                            </div>)
+                            })}
+                        </>:
+                        <>
+                        <h3>{viewedMarker?.name}</h3>
+                        <p>{viewedMarker?.content}</p>
+                        <NewsApp articles={viewedArticles} /> {/* Pass news articles to NewsApp */}
+                        </>
+                        }
+                    </div>
+                </div>
+                <div
+                    style={{
+                    position: 'fixed', // Keep the button fixed in place
+                    bottom: '20px', // Position it 20px from the bottom
+                    right: '20px', // Position it 20px from the right
+                    display: (isLoggedIn && isUser) ? 'block' : 'none',
+                    }}
+                >
+                    <button
+                    onClick={() => {togglePostForm()}}
+                    style={{
+                        padding: '8px 12px',
+                        backgroundColor: 'white',
+                        color: 'black',
+                        border: 'none',
+                        borderRadius: '100px', // Rounded button
+                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.2)', // Add a shadow for depth
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        transition: 'transform 0.2s, background-color 0.3s',
+                    }}
+                    onMouseEnter={(e) =>
+                        (e.currentTarget.style.backgroundColor = 'grey') // Hover effect
                     }
-                  </div>
+                    onMouseLeave={(e) =>
+                        (e.currentTarget.style.backgroundColor = 'white') // Reset background color on leave
+                    }
+                    onMouseDown={(e) => (e.currentTarget.style.transform = 'scale(0.95)')} // Press effect
+                    onMouseUp={(e) => (e.currentTarget.style.transform = 'scale(1)')} // Release effect
+                    >
+                    <CreateIcon></CreateIcon>
+                    </button>
+                    {isPostFormVisible && (
+                        <div
+                        style={{
+                            position: "fixed",
+                            bottom: "50px", // Position above the button
+                            right: "80px",
+                            zIndex: 1000, // Ensure it appears above other elements
+                            backgroundColor: "transparent",
+                            borderRadius: "12px",
+                            maxWidth: "400px",
+                        }}
+                        >
+                        <PostForm isLoaded={isLoaded}/>
+                        </div>
+                    )}
                 </div>
             </div>
         ) : (
