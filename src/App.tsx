@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useRef } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { mapOptions, stateCenters } from './MapOptions.ts'; // Import the options and state centers
@@ -5,7 +6,7 @@ import NewsApp from './news'; // Import NewsApp component
 import axios from 'axios'; // Import axios for fetching news
 import './App.css';
 
-// Define map container styles
+
 const containerStyle = {
     width: '100%',
     height: '100vh',
@@ -88,6 +89,13 @@ const stateNameToAbbreviation = (stateName: string) => {
 };
 
 const App: React.FC = () => {
+    /*  <BrowserRouter>
+    <Routes>
+        <Route path='/signup' element={<SignUpForm/>}/>
+        <Route path='/login' element={<Login/>}/>
+        <Route path='/reset-password' element={<ResetPassword/>}/>
+    </Routes>
+    </BrowserRouter> */
     // Load the Google Maps script using the hook
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
