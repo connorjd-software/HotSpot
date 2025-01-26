@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { GoogleMap, useJsApiLoader, Marker, InfoWindow, Libraries } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, Marker, InfoWindowF, Libraries } from '@react-google-maps/api';
 import { mapOptions, stateCenters, stateNameToAbbreviation, filters} from './MapOptions.ts'; // Import the options and state centers
 import { NewsApp, NewsTitles } from './news'; // Import NewsApp component
 import axios from 'axios'; // Import axios for fetching news
@@ -309,7 +309,7 @@ const App: React.FC = () => {
                 ))}
 
                 {selectedMarker && infoWindowVisible && (
-                    <InfoWindow
+                    <InfoWindowF
                         position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
                         onCloseClick={() => { setSelectedMarker(null); setViewing(false); setInfoWindowVisible(false); }}
                     >
@@ -318,7 +318,7 @@ const App: React.FC = () => {
                             <h3>{selectedMarker.name}</h3>
                             <NewsTitles articles={viewedArticles} /> {/* Display news articles in InfoWindow */}
                         </div>
-                    </InfoWindow>
+                    </InfoWindowF>
                 )}
             </GoogleMap>
             <div
