@@ -219,7 +219,7 @@
 
         return isLoaded ? (
             <div className="fade-in" style={{display:'flex'}} >
-                {!isLoggedIn && !showLogin && <Login setClosed={setShowLogin} setIsLoggedIn={setIsLoggedIn}></Login>}
+                {!isLoggedIn && <Login setClosed={setShowLogin} setIsLoggedIn={setIsLoggedIn}></Login>}
                 <div
                 style={{
                   position: 'relative',
