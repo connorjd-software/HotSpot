@@ -128,7 +128,7 @@ const App: React.FC = () => {
                 zoom={zoom}  // Adjust zoom level to show the states
                 options={mapOptions}  // Pass map options (e.g., disable controls, etc.)
                 onLoad={onLoad}  // Handle map load event to get map instance
-                onZoomChanged={() => setZoom(map?.getZoom())}
+                onZoomChanged={() => setZoom(map?.getZoom() || 4)}
             >
                 {statePlaces.map((m) => (
                     <Marker
