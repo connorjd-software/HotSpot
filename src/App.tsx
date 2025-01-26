@@ -64,6 +64,7 @@ const App: React.FC = () => {
     const [totalQueries, setTotalQueries] = useState(0); // State to store total query count
     const [sliderValue, setSliderValue] = useState(30); // State to store slider value, start at 30 (today's date)
     const cache = useRef<{ [key: string]: any[] }>({}); // Cache to store fetched news articles
+    const [sliderEnabled, setSliderEnabled] = useState(true); // State to toggle slider visibility and functionality
 
     // Handle zoom changes
     const onZoomChanged = useCallback(() => {
@@ -131,47 +132,66 @@ const App: React.FC = () => {
 
     return isLoaded ? (
         <div>
-            <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', width: '80%', zIndex: 10 }}>
-                <input
-                    type="range"
-                    min="0"
-                    max="30"
-                    value={sliderValue}
-                    onChange={(e) => setSliderValue(Number(e.target.value))} // Adjust the slider value
-                    style={{
-                        width: '100%',
-                        appearance: 'none',
-                        background: `linear-gradient(to right, purple 0%, orange ${(sliderValue / 30) * 100}%, black ${(sliderValue / 30) * 100}%, black 100%)`,
-                        height: '8px',
-                        borderRadius: '5px',
-                        outline: 'none',
-                        opacity: '0.7',
-                        transition: 'opacity .15s ease-in-out'
-                    }}
-                />
-                <style>
-                    {`
-                    input[type="range"]::-webkit-slider-thumb {
-                        appearance: none;
-                        width: 25px;
-                        height: 25px;
-                        border-radius: 50%;
-                        background: white;
-                        cursor: pointer;
-                    }
-                    input[type="range"]::-moz-range-thumb {
-                        width: 25px;
-                        height: 25px;
-                        border-radius: 50%;
-                        background: white;
-                        cursor: pointer;
-                    }
-                    `}
-                </style>
-                <div style={{ textAlign: 'center', color: 'white' }}>
-                    {`Showing news from: ${getDateFromSliderValue(sliderValue)}`}
+            {sliderEnabled && (
+                <div style={{ position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', width: '80%', zIndex: 10 }}>
+                    <input
+                        type="range"
+                        min="0"
+                        max="30"
+                        value={sliderValue}
+                        onChange={(e) => setSliderValue(Number(e.target.value))} // Adjust the slider value
+                        style={{
+                            width: '100%',
+                            appearance: 'none',
+                            background: `linear-gradient(to right, purple 0%, orange ${(sliderValue / 30) * 100}%, black ${(sliderValue / 30) * 100}%, black 100%)`,
+                            height: '8px',
+                            borderRadius: '5px',
+                            outline: 'none',
+                            opacity: '0.7',
+                            transition: 'opacity .15s ease-in-out'
+                        }}
+                    />
+                    <style>
+                        {`
+                        input[type="range"]::-webkit-slider-thumb {
+                            appearance: none;
+                            width: 25px;
+                            height: 25px;
+                            border-radius: 50%;
+                            background: white;
+                            cursor: pointer;
+                        }
+                        input[type="range"]::-moz-range-thumb {
+                            width: 25px;
+                            height: 25px;
+                            border-radius: 50%;
+                            background: white;
+                            cursor: pointer;
+                        }
+                        `}
+                    </style>
+                    <div style={{ textAlign: 'center', color: 'white' }}>
+                        {`Showing news from: ${getDateFromSliderValue(sliderValue)}`}
+                    </div>
                 </div>
-            </div>
+            )}
+            <button
+                onClick={() => setSliderEnabled(!sliderEnabled)}
+                style={{
+                    position: 'absolute',
+                    top: sliderEnabled ? '70px' : '20px',
+                    left: '10px',
+                    zIndex: 10,
+                    padding: '10px',
+                    backgroundColor: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold'
+                }}
+            >
+                {sliderEnabled ? 'Hide Slider' : 'Show Slider'}
+            </button>
             <GoogleMap
                 mapContainerStyle={containerStyle}  // Set the container size
                 center={center}  // Set the center of the map
