@@ -1,17 +1,17 @@
-    import React, { useState, useCallback, useRef, useEffect } from 'react';
-    import { GoogleMap, useJsApiLoader, Marker, InfoWindow, Libraries } from '@react-google-maps/api';
-    import { mapOptions, stateCenters, stateNameToAbbreviation} from './MapOptions.ts';
-    import Login from "./components/Login.tsx";
-    import { NewsApp, NewsTitles } from './news'; // Import NewsApp component
-    import axios from 'axios'; // Import axios for fetching news
-    import './App.css';
-    import TravelExploreIcon from '@mui/icons-material/TravelExplore';
-    import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-    import LocalTaxiIcon from '@mui/icons-material/LocalTaxi';
-    import SportsBaseballIcon from '@mui/icons-material/SportsBaseball';
-    import GiteIcon from '@mui/icons-material/Gite';
-    import GavelIcon from '@mui/icons-material/Gavel';
-    import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { GoogleMap, useJsApiLoader, Marker, InfoWindowF, Libraries } from '@react-google-maps/api';
+import { mapOptions, stateCenters, stateNameToAbbreviation } from './MapOptions';
+import Login from "./components/Login";
+import { NewsApp, NewsTitles } from './news'; // Import NewsApp component
+import axios from 'axios'; // Import axios for fetching news
+import './App.css';
+import TravelExploreIcon from '@mui/icons-material/TravelExplore';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import LocalTaxiIcon from '@mui/icons-material/LocalTaxi';
+import SportsBaseballIcon from '@mui/icons-material/SportsBaseball';
+import GiteIcon from '@mui/icons-material/Gite';
+import GavelIcon from '@mui/icons-material/Gavel';
+import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
 
 const libraries: Libraries = ['places'];
 
@@ -25,7 +25,7 @@ interface Place {
     lng: number,
     name: string,
     content: string,
-    time: number
+    time: number,
     state?: string,
     type: string,
 }
@@ -176,6 +176,7 @@ const App: React.FC = () => {
             return;
         }
 
+        const categories = ["none", "Travel", "Sports", "Finance", "Politics"]; // Define categories array
         const cacheKey = marker.type === "city" ? `${marker.name}-${stateAbbreviation}-${sliderValue}-${categories[selectedFilter]}` : `${stateAbbreviation}-${sliderValue}-${categories[selectedFilter]}`;
         if (cache.current[cacheKey]) {
             setNewsArticles(cache.current[cacheKey]);
@@ -264,7 +265,7 @@ const App: React.FC = () => {
                             <TravelExploreIcon/>
                         All
                     </div>
-                    <div key={1}
+                    {/* <div key={1}
                               className={"filter-item " + (selectedFilter === 1 ? "selected-filter" : "")}
                               onClick={() => {
                                   setSelectedFilter(1);
@@ -273,21 +274,21 @@ const App: React.FC = () => {
                           >
                             <LocalTaxiIcon/>
                         Local
-                    </div>
+                    </div> */}
                     <div key={2}
-                              className={"filter-item " + (selectedFilter === 2 ? "selected-filter" : "")}
+                              className={"filter-item " + (selectedFilter === 1 ? "selected-filter" : "")}
                               onClick={() => {
-                                  setSelectedFilter(2);
+                                  setSelectedFilter(1);
                               }}
                               style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
                           >
                             <GiteIcon/>
-                        Real Estate
+                        Travel
                     </div>
                     <div key={3}
-                              className={"filter-item " + (selectedFilter === 3 ? "selected-filter" : "")}
+                              className={"filter-item " + (selectedFilter === 2 ? "selected-filter" : "")}
                               onClick={() => {
-                                  setSelectedFilter(3);
+                                  setSelectedFilter(2);
                               }}
                               style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
                           >
@@ -295,9 +296,9 @@ const App: React.FC = () => {
                         Sports
                     </div>
                     <div key={4}
-                              className={"filter-item " + (selectedFilter === 4 ? "selected-filter" : "")}
+                              className={"filter-item " + (selectedFilter === 3 ? "selected-filter" : "")}
                               onClick={() => {
-                                  setSelectedFilter(4);
+                                  setSelectedFilter(3);
                               }}
                               style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
                           >
@@ -305,9 +306,9 @@ const App: React.FC = () => {
                         Finance
                     </div>
                     <div key={5}
-                              className={"filter-item " + (selectedFilter === 5 ? "selected-filter" : "")}
+                              className={"filter-item " + (selectedFilter === 4 ? "selected-filter" : "")}
                               onClick={() => {
-                                  setSelectedFilter(5);
+                                  setSelectedFilter(4);
                               }}
                               style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
                           >
@@ -397,7 +398,7 @@ const App: React.FC = () => {
                 ))}
 
                     {selectedMarker && infoWindowVisible && (
-                        <InfoWindow
+                        <InfoWindowF
                             position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
                             onCloseClick={() => { setSelectedMarker(null); setViewing(false); setInfoWindowVisible(false); }}
                         >
@@ -406,7 +407,7 @@ const App: React.FC = () => {
                                 <h3>{selectedMarker.name}</h3>
                                 <NewsTitles articles={newsArticles} /> {/* Display news articles in InfoWindow */}
                             </div>
-                        </InfoWindow>
+                        </InfoWindowF>
                     )}
                 </GoogleMap>
                 </div>
