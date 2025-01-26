@@ -18,6 +18,7 @@ import NewspaperIcon from '@mui/icons-material/Newspaper';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import CreateIcon from '@mui/icons-material/Create';
+import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
 
 import { readPost } from './components/FireBase';
 
@@ -86,8 +87,12 @@ const App: React.FC = () => {
         const [postMarkers, setPostMarkers] = useState<Place[]>([]);
         const [nearbyIndex, setNearbyIndex] = useState<number>(0);
         const [isPostFormVisible, setPostFormVisible] = useState(false);
+        const [isSliderVisible, setSliderVisible] = useState(false);
         const togglePostForm = () => {
             setPostFormVisible((prev) => !prev); // Toggle the visibility state
+        };
+        const toggleSliderVisibility = () => {
+            setSliderVisible((prev) => !prev);
         };
         useEffect(() => {
             if (zoom < 10) {
@@ -280,6 +285,10 @@ const App: React.FC = () => {
                             <LocationSearchingIcon/>
                         Me
                     </div>
+                    <div key={0} className={"filter-item"} style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
+                        onClick={() => toggleSliderVisibility()}>
+                        <ManageHistoryIcon/> Timeframe Adjust
+                    </div>
                     <div key={'posts'}
                               className={"filter-item "}
                               onClick={() => {
@@ -314,8 +323,9 @@ const App: React.FC = () => {
                             {showPosts?<CommentIcon/> : <NewspaperIcon/>}
                         {showPosts?"Showing Posts": "Showing News"}
                     </div>
+                    
                   <div style={{backgroundColor: 'lightgray', height:'2px', width:'80px', marginTop:'10px', marginBottom:'10px'}}></div>
-                  <div key={0}
+                  <div key={1}
                               className={"filter-item " + (selectedFilter === 0 ? "selected-filter" : "")}
                               onClick={() => {
                                   setSelectedFilter(0);
@@ -378,6 +388,7 @@ const App: React.FC = () => {
                   </div>
                 </div>
                 <div style={{width:"100%", right:"0px", position:"relative", display: 'flex'}}>
+                {isSliderVisible &&
                 <div style={{ position: 'absolute', top: '20px', width: '90%', zIndex: 10, margin:'auto' }}>
                         <input
                             type="range"
@@ -419,6 +430,7 @@ const App: React.FC = () => {
                             {`Gathering news from: ${getDateFromSliderValue(sliderValue)}`}
                         </div>
                     </div>
+                }
                 <GoogleMap
                     mapContainerStyle={containerStyle} // Set the container size
                     center={center} // Set the center of the map
