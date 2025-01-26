@@ -1,6 +1,7 @@
     import React, { useState, useCallback, useRef, useEffect } from 'react';
     import { GoogleMap, useJsApiLoader, Marker, InfoWindow, Libraries } from '@react-google-maps/api';
-    import { mapOptions, stateCenters, stateNameToAbbreviation, filters} from './MapOptions.ts'; // Import the options and state centers
+    import { mapOptions, stateCenters, stateNameToAbbreviation, filters} from './MapOptions.ts';
+    import Login from "./components/Login.tsx";
     import { NewsApp, NewsTitles } from './news'; // Import NewsApp component
     import axios from 'axios'; // Import axios for fetching news
     import './App.css';
@@ -64,9 +65,10 @@
         const [localityMarkers, setLocalityMarkers] = useState<Place[]>([]); // State to store locality markers
         const [viewedArticles, setViewedArticles] = useState<any[]>([]);
         const [selectedFilter, setSelectedFilter] = useState<number>(0)
+        const [showLogin, setShowLogin] = useState<boolean>(true);
+        const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
         useEffect(() => {
-            console.log(zoom)
             if (zoom < 10) {
                 setLocalityMarkers([]);
             }
@@ -210,8 +212,9 @@
 
         return isLoaded ? (
             <div className="fade-in">
+                {!isLoggedIn && showLogin && <Login setClosed={setShowLogin} setIsLoggedIn={setIsLoggedIn}></Login>}
                 {(
-                    <div style={{ position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', width: '80%', zIndex: 10 }}>
+                    <div style={{ position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', width: '80%', zIndex: 1 }}>
                         <input
                             type="range"
                             min="0"
@@ -249,7 +252,7 @@
                             `}
                         </style>
                         <div style={{ textAlign: 'center', color: 'white' }}>
-                            {`Showing news from: ${getDateFromSliderValue(sliderValue)}`}
+                            {`Gathering news from: ${getDateFromSliderValue(sliderValue)}`}
                         </div>
                         <div className="filters-container">
                             {filters.map((title: string, index: number) =>
@@ -302,16 +305,18 @@
                     ))}
 
                     {selectedMarker && infoWindowVisible && (
-                        <InfoWindow
-                            position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
-                            onCloseClick={() => { setSelectedMarker(null); setViewing(false); setInfoWindowVisible(false); }}
-                        >
-                            <div style={{width:"20vw", maxHeight:"40vh"}}>
-                                <button onClick={() => { setViewing(true); setViewedMarker(selectedMarker); setViewedArticles(newsArticles)}}>show details</button>
-                                <h3>{selectedMarker.name}</h3>
-                                <NewsTitles articles={newsArticles} /> {/* Display news articles in InfoWindow */}
-                            </div>
-                        </InfoWindow>
+                        <div style={{position: "absolute", zIndex: 100000}}>
+                            <InfoWindow
+                                position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
+                                onCloseClick={() => { setSelectedMarker(null); setViewing(false); setInfoWindowVisible(false); }}
+                            >
+                                <div style={{width:"20vw", maxHeight:"40vh"}}>
+                                    <button onClick={() => { setViewing(true); setViewedMarker(selectedMarker); setViewedArticles(newsArticles)}}>show details</button>
+                                    <h3>{selectedMarker.name}</h3>
+                                    <NewsTitles articles={newsArticles} /> {/* Display news articles in InfoWindow */}
+                                </div>
+                            </InfoWindow>
+                        </div>
                     )}
                 </GoogleMap>
                 <div
