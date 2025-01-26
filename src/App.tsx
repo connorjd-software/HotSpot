@@ -1,17 +1,20 @@
-    import React, { useState, useCallback, useRef, useEffect } from 'react';
-    import { GoogleMap, useJsApiLoader, Marker, InfoWindow, Libraries } from '@react-google-maps/api';
-    import { mapOptions, stateCenters, stateNameToAbbreviation} from './MapOptions.ts';
-    import Login from "./components/Login.tsx";
-    import { NewsApp, NewsTitles } from './news'; // Import NewsApp component
-    import axios from 'axios'; // Import axios for fetching news
-    import './App.css';
-    import TravelExploreIcon from '@mui/icons-material/TravelExplore';
-    import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-    import LocalTaxiIcon from '@mui/icons-material/LocalTaxi';
-    import SportsBaseballIcon from '@mui/icons-material/SportsBaseball';
-    import GiteIcon from '@mui/icons-material/Gite';
-    import GavelIcon from '@mui/icons-material/Gavel';
-    import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { GoogleMap, useJsApiLoader, Marker, InfoWindowF, Libraries } from '@react-google-maps/api';
+import { mapOptions, stateCenters, stateNameToAbbreviation} from './MapOptions.ts';
+import Login from "./components/Login.tsx";
+import { NewsApp, NewsTitles } from './news'; // Import NewsApp component
+import axios from 'axios'; // Import axios for fetching news
+import './App.css';
+import TravelExploreIcon from '@mui/icons-material/TravelExplore';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import LocalTaxiIcon from '@mui/icons-material/LocalTaxi';
+import SportsBaseballIcon from '@mui/icons-material/SportsBaseball';
+import GiteIcon from '@mui/icons-material/Gite';
+import GavelIcon from '@mui/icons-material/Gavel';
+import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
+import CommentIcon from '@mui/icons-material/Comment';
+import NewspaperIcon from '@mui/icons-material/Newspaper';
+import { readPost } from './components/FireBase.tsx';
 
     const libraries: Libraries = ['places'];
 
@@ -25,7 +28,7 @@
         lng: number,
         name: string,
         content: string,
-        time: number
+        time: string
         state?: string,
         type: string,
     }
@@ -37,7 +40,7 @@
             lng: sc.lng,
             name: sc.name,
             content: "state description",
-            time: 0,
+            time: "0",
             type: "state"
         } as Place
     });
@@ -74,6 +77,8 @@
         const [selectedFilter, setSelectedFilter] = useState<number>(0)
         const [showLogin, setShowLogin] = useState<boolean>(true);
         const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+        const [showPosts, setShowPosts] = useState<boolean>(false);
+        const [postMarkers, setPostMarkers] = useState<Place[]>([]);
 
         useEffect(() => {
             if (zoom < 10) {
@@ -249,6 +254,39 @@
                             <LocationSearchingIcon/>
                         Me
                     </div>
+                    <div key={'posts'}
+                              className={"filter-item "}
+                              onClick={() => {
+                                  navigator.geolocation.getCurrentPosition((p) => {
+                                    if (!showPosts){
+                                      const newPosts: Place[] = []
+                                      readPost((data) => {
+                                        Object.keys(data).forEach((d) => {
+                                          const p = data[d]
+                                          const newPlace =  {
+                                            lat: p.location.lat,
+                                            lng: p.location.lng,
+                                            name: p.title,
+                                            content: p.content,
+                                            time: "0",
+                                            type: "state"
+                                          } as Place
+                                          newPosts.push(newPlace)
+                                          
+                                          //setPostMarkers([...postMarkers, newPlace])
+                                        });
+                                        setPostMarkers(newPosts)
+                                        console.log(newPosts)
+                                      })
+                                    }
+                                  });
+                                  setShowPosts(!showPosts);
+                              }}
+                              style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
+                          >
+                            {showPosts?<CommentIcon/> : <NewspaperIcon/>}
+                        {showPosts?"Showing Posts": "Showing News"}
+                    </div>
                   <div style={{backgroundColor: 'lightgray', height:'2px', width:'80px', marginTop:'10px', marginBottom:'10px'}}></div>
                   <div key={0}
                               className={"filter-item " + (selectedFilter === 0 ? "selected-filter" : "")}
@@ -364,7 +402,21 @@
                     onLoad={onLoad} // Handle map load event to get map instance
                     onZoomChanged={() => setZoom(map?.getZoom() || 4)}
                 >
-                    {statePlaces.map((m) => (
+                    {showPosts && postMarkers.map((m) => (
+                        <Marker
+                            key={m.name}
+                            position={{ lat: m.lat, lng: m.lng }}
+                            title={m.name}
+                            onClick={() => {
+                                setSelectedMarker(m);
+                                //fetchNews(m); // Fetch news for the selected marker
+                                setCenter({ lat: m.lat, lng: m.lng });
+                                setZoom(13);
+                            }} // Set the selected state on marker click
+                        />
+                    ))}
+
+                    {!showPosts && statePlaces.map((m) => (
                         <Marker
                             key={m.name}
                             position={{ lat: m.lat, lng: m.lng }}
@@ -378,7 +430,7 @@
                         />
                     ))}
 
-                    {localityMarkers.map((m, index) => (
+                    {!showPosts && localityMarkers.map((m, index) => (
                         <Marker
                             key={`locality-${index}`}
                             position={{ lat: m.lat, lng: m.lng }}
@@ -392,17 +444,17 @@
                         />
                     ))}
 
-                    {selectedMarker && infoWindowVisible && (
-                        <InfoWindow
+                    {selectedMarker && (
+                        <InfoWindowF
                             position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
                             onCloseClick={() => { setSelectedMarker(null); setViewing(false); setInfoWindowVisible(false); }}
                         >
                             <div style={{width:"20vw", maxHeight:"40vh"}}>
                                 <button onClick={() => { setViewing(true); setViewedMarker(selectedMarker); setViewedArticles(newsArticles)}}>show details</button>
                                 <h3>{selectedMarker.name}</h3>
-                                <NewsTitles articles={newsArticles} /> {/* Display news articles in InfoWindow */}
+                                {!showPosts?<NewsTitles articles={newsArticles} /> : <div>{selectedMarker.content}</div>}{/* Display news articles in InfoWindow */}
                             </div>
-                        </InfoWindow>
+                        </InfoWindowF>
                     )}
                 </GoogleMap>
                 </div>
