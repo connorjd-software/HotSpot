@@ -6,6 +6,10 @@ import {stateNameToAbbreviation} from "./MapOptions.ts";
 import NewsApp from './news'; // Import NewsApp component
 import axios from 'axios'; // Import axios for fetching news
 import './App.css';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Login from './components/Login.tsx';
+import ResetPassword from './components/ResetPassword.tsx';
+import SignUpForm from './components/SignUpForm.tsx';
 
 
 const containerStyle = {
@@ -33,13 +37,6 @@ const statePlaces = stateCenters.map((sc) => {
 });
 
 const App: React.FC = () => {
-    /*  <BrowserRouter>
-    <Routes>
-        <Route path='/signup' element={<SignUpForm/>}/>
-        <Route path='/login' element={<Login/>}/>
-        <Route path='/reset-password' element={<ResetPassword/>}/>
-    </Routes>
-    </BrowserRouter> */
     // Load the Google Maps script using the hook
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
@@ -122,6 +119,13 @@ const App: React.FC = () => {
 
     return isLoaded ? (
         <div>
+            <BrowserRouter>
+            <Routes>
+                <Route path='/signup' element={<SignUpForm/>}/>
+                <Route path='/login' element={<Login/>}/>
+                <Route path='/reset-password' element={<ResetPassword/>}/>
+            </Routes>
+            </BrowserRouter>
             <GoogleMap
                 mapContainerStyle={containerStyle}  // Set the container size
                 center={center}  // Set the center of the map
