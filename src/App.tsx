@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect, ReactElement } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindowF, Libraries } from '@react-google-maps/api';
 import { mapOptions, stateCenters, stateNameToAbbreviation } from './MapOptions';
 import Login from "./components/Login";
@@ -16,6 +16,10 @@ import CommentIcon from '@mui/icons-material/Comment';
 import NewspaperIcon from '@mui/icons-material/Newspaper';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import MoreIcon from '@mui/icons-material/More';
+import ClearIcon from '@mui/icons-material/Clear';
+import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
+import BackpackIcon from '@mui/icons-material/Backpack';
 
 import { readPost } from './components/FireBase';
 
@@ -82,6 +86,7 @@ const App: React.FC = () => {
         const [showPosts, setShowPosts] = useState<boolean>(false);
         const [postMarkers, setPostMarkers] = useState<Place[]>([]);
         const [nearbyIndex, setNearbyIndex] = useState<number>(0);
+        const [navbarToggled, setNavbarToggled] = useState<boolean>(true);
 
         useEffect(() => {
             if (zoom < 10) {
@@ -200,7 +205,7 @@ const App: React.FC = () => {
         }
 
         const fromDate = getDateFromSliderValue(sliderValue);
-        const apiKey = import.meta.env.VITE_NEWS_API_KEY;
+        const apiKey = 'f6940de1-82e3-407c-8c7b-884545820224';
         const category = categories[selectedFilter] || 'none'; // Ensure category is set to 'none' if undefined
         const url = marker.type === "city"
             ? `https://api.goperigon.com/v1/all?&country=us&language=en&state=${encodeURIComponent(stateAbbreviation)}&city=${encodeURIComponent(marker.name)}&from=${fromDate}&category=${category}&apiKey=${apiKey}`
@@ -230,6 +235,7 @@ const App: React.FC = () => {
         setInfoWindowVisible(true); // Ensure InfoWindow is visible after fetching news
     };
     const nearbyMarkers: Place[] = []    
+    const nearbyList: ReactElement[] = []
     if (showPosts && selectedMarker){
           const lat1 = selectedMarker.lat
           const lng1 = selectedMarker.lng
@@ -237,9 +243,17 @@ const App: React.FC = () => {
           postMarkers.forEach((p) => {
             if ( Math.abs(lat1 - p.lat) < 0.001 && Math.abs(lng1 - p.lng) < 0.001){
               nearbyMarkers.push(p)
+              nearbyList.push(
+              <div style={{marginTop:'20px', marginBottom:'20px', width:'100%'}}>
+                <h1>{p.name}</h1>
+                <p>{p.content}</p>
+                <div style={{marginRight:'20px', textAlign:'right'}}><ThumbUpAltIcon/></div>
+              </div>)
+              nearbyList.push(<div style={{backgroundColor:'lightgray', height:'2px', width:'90%'}}></div>)
             }
           })
           //console.log(postMarkers, nearbyMarkers)
+          nearbyList.pop()
         }
 
         return isLoaded ? (
@@ -254,12 +268,16 @@ const App: React.FC = () => {
                   padding: 10,
                   height: '100vh',
                   width: '120px',
-                  overflow: 'hidden',
+                  overflow: 'visible',
                   color: "black",
+                  marginLeft:navbarToggled?'0px':'-120px',
+                  transition:'1s',
+                  zIndex:40
                 }}
-              >
-
-                  <div className="filters-container" style={{display:'flex', flexDirection: 'column', margin:'auto', width:"100%", justifyContent:"center", height:'100%', overflowY:'auto', overflowX:'hidden'}}>
+              >   
+                  <div style={{position:'absolute', left:'110px', color:'lightgray', zIndex: 10, top:'48vh', backgroundColor:'white', height:'40px', paddingTop:'7px', paddingLeft:'10px', borderRadius:'5px'}} onClick={() => setNavbarToggled(!navbarToggled)}>{navbarToggled?<ArrowBackIosNewIcon/>: <ArrowForwardIosIcon/>}</div>
+                  <div className="filters-container" style={{display:'flex', flexDirection: 'column', margin:'auto', width:"100%", justifyContent:"center", height:'100%', overflowY:'auto', overflowX:'hidden'}}>                    
+                  
                   <div key={-1}
                               className={"filter-item "}
                               onClick={() => {
@@ -296,12 +314,13 @@ const App: React.FC = () => {
                                           //setPostMarkers([...postMarkers, newPlace])
                                         });
                                         setPostMarkers(newPosts)
-                                        console.log(newPosts)
+                                        //console.log(newPosts)
                                       })
                                     }
                                   });
                                   setShowPosts(!showPosts);
                                   setSelectedMarker(null)
+                                  setViewing(false)
                               }}
                               style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
                           >
@@ -336,7 +355,7 @@ const App: React.FC = () => {
                               }}
                               style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
                           >
-                            <GiteIcon/>
+                            <BackpackIcon/>
                         Travel
                     </div>
                     <div key={3}
@@ -471,8 +490,7 @@ const App: React.FC = () => {
                             onCloseClick={() => { setSelectedMarker(null); setViewing(false); setInfoWindowVisible(false); setNearbyIndex(0)}}
                         >
                             <div style={{width:"20vw", maxHeight:"40vh"}}>
-                                <button onClick={() => { setViewing(!viewing); setViewedMarker(selectedMarker); setViewedArticles(newsArticles)}}>show details</button>
-                                {!showPosts?<><h3>{selectedMarker.name}</h3><NewsTitles articles={newsArticles} /> </>: null}{/* Display news articles in InfoWindow */}
+                                {!showPosts?<><div onClick={() => { setViewing(!viewing); setViewedMarker(selectedMarker); setViewedArticles(newsArticles)}} style={{textAlign:'right'}}>Read More</div><h3>{selectedMarker.name}</h3><NewsTitles articles={newsArticles} /> </>: null}{/* Display news articles in InfoWindow */}
                                 {showPosts?
                                 <div style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
                                   <div>{nearbyMarkers.length + " post" + (nearbyMarkers.length>1?'s':'')}</div>
@@ -481,9 +499,10 @@ const App: React.FC = () => {
                                     <div>{nearbyMarkers[nearbyIndex].content}</div>
                                   </div>
                                   <div style={{padding:'10px', display:'flex', flexDirection:'row'}}>
-                                    <div style={{marginRight:"15vw"}} onClick={() => setNearbyIndex(Math.max(0, nearbyIndex-1))}><ArrowBackIosNewIcon style={{color:nearbyIndex > 0?'blue':'black'}}/></div>
-                                    <div onClick={() => setNearbyIndex(Math.min(nearbyMarkers.length-1, nearbyIndex+1))}><ArrowForwardIosIcon style={{color:nearbyIndex < nearbyMarkers.length-1?'blue':'black'}}/></div>
+                                    <div style={{marginRight:"5vw"}} onClick={() => setNearbyIndex(Math.max(0, nearbyIndex-1))}><ArrowBackIosNewIcon style={{color:nearbyIndex > 0?'blue':'black'}}/></div>
+                                    <div  onClick={() => setNearbyIndex(Math.min(nearbyMarkers.length-1, nearbyIndex+1))}><ArrowForwardIosIcon style={{color:nearbyIndex < nearbyMarkers.length-1?'blue':'black'}}/></div>
                                   </div>
+                                  <div onClick={() => { setViewing(!viewing); setViewedMarker(selectedMarker); setViewedArticles(newsArticles)}} style={{textAlign:'right'}}>Read More</div>
                                 </div>
                                 :null}
                             </div>
@@ -506,16 +525,11 @@ const App: React.FC = () => {
                         borderRadius:'10px'
                     }}
                 >
-                  <div style={{overflowY:'auto', height:'100%'}}>
-                  <button onClick={() => setViewing(false)}>exit</button>
+                  <div style={{overflowY:'auto', height:'100%', justifyItems:'center', textAlign:'center'}}>
+                  <div onClick={() => setViewing(false)} style={{float:'right'}}><ClearIcon/></div>
                     {
                       showPosts? <>
-                        {nearbyMarkers.map((m) => {
-                          return (<div>
-                            <div>{m.name}</div>
-                            <div>{m.content}</div>
-                          </div>)
-                        })}
+                        {nearbyList}
                       </>:
                       <>
                       <h3>{viewedMarker?.name}</h3>

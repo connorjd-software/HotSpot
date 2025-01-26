@@ -13,12 +13,13 @@ const NewsApp: React.FC<NewsAppProps> = ({ articles }) => {
           <h2 className="text-2xl font-semibold mb-4">
             Top News:
           </h2>
-          <ul className="space-y-4">
+          <ul className="space-y-4" style={{justifyItems:'center', textAlign:'center'}}>
             {articles.map((article, index) => (
               <li
                 key={index}
                 className="bg-white shadow-md rounded-lg p-4 flex flex-col"
               >
+                <div style={{backgroundColor:'lightgray', height:'2px', width:'100%', marginTop:'10px', marginBottom:'10px'}}></div>
                 <a
                   href={article.url}
                   target="_blank"
@@ -31,6 +32,7 @@ const NewsApp: React.FC<NewsAppProps> = ({ articles }) => {
                 <p className="text-sm text-gray-500 mt-2">
                   Source: {article.source.name}
                 </p>
+              
               </li>
             ))}
           </ul>
@@ -57,6 +59,7 @@ const NewsTitles: React.FC<NewsAppProps> =  ({ articles }) => {
                 key={index}
                 className="bg-white shadow-md rounded-lg p-4 flex flex-col"
               >
+                <div style={{backgroundColor:'lightgray', height:'2px', width:'90%', marginTop:'10px', marginBottom:'10px'}}></div>
                 <a
                   href={article.url}
                   target="_blank"
@@ -65,6 +68,7 @@ const NewsTitles: React.FC<NewsAppProps> =  ({ articles }) => {
                 >
                   {article.title}
                 </a>
+                
               </li>
             ))}
           </ul>
