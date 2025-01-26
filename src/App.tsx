@@ -128,6 +128,7 @@ const App: React.FC = () => {
                 zoom={zoom}  // Adjust zoom level to show the states
                 options={mapOptions}  // Pass map options (e.g., disable controls, etc.)
                 onLoad={onLoad}  // Handle map load event to get map instance
+                onZoomChanged={() => setZoom(map?.getZoom())}
             >
                 {statePlaces.map((m) => (
                     <Marker
@@ -138,6 +139,7 @@ const App: React.FC = () => {
                             setSelectedMarker(m);
                             fetchNews(m.name); // Fetch news for the selected marker
                             setCenter({ lat: m.lat, lng: m.lng });
+                            setZoom(8);
                         }}  // Set the selected state on marker click
                     />
                 ))}
