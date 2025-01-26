@@ -1,9 +1,4 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import Login from './components/Login.tsx';
-import ResetPassword from './components/ResetPassword.tsx';
-import SignUpForm from './components/SignUpForm.tsx';
-import PostForm from './components/PostForm.tsx';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { mapOptions, stateCenters } from './MapOptions.ts'; // Import the options and state centers
 import {stateNameToAbbreviation} from "./MapOptions.ts";
@@ -128,14 +123,6 @@ const App: React.FC = () => {
 
     return isLoaded ? (
         <div>
-            {/* <BrowserRouter>
-            <Routes>
-                <Route path='/signup' element={<SignUpForm/>}/>
-                <Route path='/login' element={<Login/>}/>
-                <Route path='/reset-password' element={<ResetPassword/>}/>
-                <Route path='/user-post' element={<PostForm markerLat={0} markerLng={0}/>}/>
-            </Routes>
-            </BrowserRouter> */}
             <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', width: '80%', zIndex: 10 }}>
                 <input
                     type="range"
