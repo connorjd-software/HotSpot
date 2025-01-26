@@ -1,4 +1,47 @@
 body {
     margin: 0;
     padding: 0;
+    overflow: hidden;
+    font: 400 11px Roboto, Arial, sans-serif;
+}
+
+.filters-container {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.filter-item {
+    background-color: #5f899e;
+    width: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.filter-item:hover {
+    background-color: #c3ced9;
+}
+
+.filter-item.selected-filter {
+    background-color: #b5ccd5;
+}
+
+/* CSS for fade-in animation */
+.fade-in {
+    animation: fadeIn 1s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
