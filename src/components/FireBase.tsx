@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth } from 'firebase/auth'
-import { getDatabase, ref, set } from "firebase/database";
+import { getDatabase, onValue, ref, set } from "firebase/database";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -23,23 +23,25 @@ const auth = getAuth(app);
 
 function writePost(
     userId: string,
-    name: string,
+    title: string,
     content: string,
     imgUrl: string, // List of image URLs (array of strings)
     lat: number, // Latitude of the post location
     lng: number  // Longitude of the post location
 ) {
     const db = getDatabase(app); // Initialize the database associated with the app
-    const reference = ref(db, `UsersPosts/${userId}`); // Path to store post under `posts/userId`
+    const timeCreated = new Date();
+    const reference = ref(db, `UsersPosts/${timeCreated}`); // Path to store post under `posts/userId`
     set(reference, {
-        username: name,
+        title: title,
         content: content,
         imgUrl: imgUrl,
         location: {
             lat: lat,
             lng: lng,
         },
-        createdAt: new Date().toISOString(),    
+        createdAt: timeCreated,  
+        userId: userId  
     }).then(() => {
         console.log("Post successfully written to the database!");
     }).catch((error) => {
@@ -47,4 +49,13 @@ function writePost(
     });
 }
 
-export { auth, writePost };
+function readPost(){
+    const db = getDatabase(app); // Initialize the database associated with the app
+    const reference = ref(db, `UsersPosts`); // Path to store post under `posts/userId`
+    onValue(reference, (s) => {
+        const data = s.val();
+        console.log(data);
+    })
+}
+
+export { auth, writePost, readPost};

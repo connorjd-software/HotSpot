@@ -69,20 +69,24 @@ form p {
     cursor: pointer;
     transition: background-color 0.3s;
 }
+
+.hide {
+    display:none
+}
   
 /* Responsive Design */
 @media (max-width: 600px) {
-form {
-    padding: 1rem;
-}
+    form {
+        padding: 1rem;
+    }
 
-form input[type="text"],
-form textarea {
-    font-size: 0.9rem;
-}
+    form input[type="text"],
+    form textarea {
+        font-size: 0.9rem;
+    }
 
-form button {
-    font-size: 0.9rem;
-    padding: 8px 12px;
-}
+    form button {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+    }
 }  
