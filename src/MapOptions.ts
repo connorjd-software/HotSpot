@@ -433,8 +433,9 @@ export const stateNameToAbbreviation = (stateName: string) => {
 export const filters = [
     "All",
     "Local",
-    "Real-estate",
-    "Sports",
-    "Finance",
+    "Travel",
+    "Environment",
+    "Health",
+    "LifeStyle",
     "Politics"
 ]
