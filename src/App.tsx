@@ -286,7 +286,7 @@ const App: React.FC = () => {
                 }}
                 >
                   <div style={{position:'absolute', left:'110px', color:'lightgray', zIndex: 10, top:'48vh', backgroundColor:'white', height:'40px', paddingTop:'7px', paddingLeft:'10px', borderRadius:'5px'}} onClick={() => setNavbarToggled(!navbarToggled)}>{navbarToggled?<ArrowBackIosNewIcon/>: <ArrowForwardIosIcon/>}</div>
-                  <div className="filters-container" style={{display:'flex', flexDirection: 'column', margin:'auto', width:"100%", justifyContent:"center", height:'100%', overflowY:'auto', overflowX:'hidden'}}>
+                  <div className="filters-container" style={{display:'flex', flexDirection: 'column', margin:'auto', width:"100%", justifyContent:"center", height:'100%', overflowX:'hidden'}}>
                   <div key={-1}
                               className={"filter-item "}
                               onClick={() => {
