@@ -59,7 +59,7 @@ const HomePage = () => {
     >
       <header className="header">
         <div className="logo">
-          <h1>Website Name</h1> {/* Replace "Website Name" later */}
+          <h1>HOTSPOT</h1> {/* Replace "Website Name" later */}
         </div>
         <button className="mode-toggle" onClick={toggleDarkMode}>
           {darkMode ? <FaSun /> : <FaMoon />}
@@ -90,13 +90,13 @@ const HomePage = () => {
           </div>
         </section>
 
-        <section className="join">
+        <section className="join" style={{marginTop:"3.5rem", marginBottom:"3rem"}}>
             <p><Link to="/app">Join</Link></p>
         </section>
       </main>
 
       <footer className="footer">
-        <p>&copy; 2025 Website Name. All rights reserved.</p>
+        <p>&copy; 2025 HOTSPOT. All rights reserved.</p>
       </footer>
     </div>
   );

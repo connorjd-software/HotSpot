@@ -32,7 +32,7 @@ body {
 }
 
 .dark-mode .header {
-    background: linear-gradient(90deg, #6a0572 0%, #1d2671 100%);
+    background: transparent;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -143,7 +143,7 @@ body {
 }
 
 .dark-mode .footer {
-    background: linear-gradient(90deg, #6a0572 0%, #1d2671 100%);
+    background: linear-gradient(90deg, #3c0041 0%, #000536 100%);
     color: #ffffff;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -212,7 +212,7 @@ body {
 }
 
 .dark-mode .join a {
-    background-color: #53254b;
+    background-color: #28002b;
 }
 
 .dark-mode .join a:hover {
