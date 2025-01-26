@@ -1,9 +1,17 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { GoogleMap, useJsApiLoader, Marker, InfoWindowF, Libraries } from '@react-google-maps/api';
-import { mapOptions, stateCenters, stateNameToAbbreviation, filters} from './MapOptions.ts'; // Import the options and state centers
-import { NewsApp, NewsTitles } from './news'; // Import NewsApp component
-import axios from 'axios'; // Import axios for fetching news
-import './App.css';
+    import React, { useState, useCallback, useRef, useEffect } from 'react';
+    import { GoogleMap, useJsApiLoader, Marker, InfoWindow, Libraries } from '@react-google-maps/api';
+    import { mapOptions, stateCenters, stateNameToAbbreviation} from './MapOptions.ts';
+    import Login from "./components/Login.tsx";
+    import { NewsApp, NewsTitles } from './news'; // Import NewsApp component
+    import axios from 'axios'; // Import axios for fetching news
+    import './App.css';
+    import TravelExploreIcon from '@mui/icons-material/TravelExplore';
+    import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+    import LocalTaxiIcon from '@mui/icons-material/LocalTaxi';
+    import SportsBaseballIcon from '@mui/icons-material/SportsBaseball';
+    import GiteIcon from '@mui/icons-material/Gite';
+    import GavelIcon from '@mui/icons-material/Gavel';
+    import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
 
 const libraries: Libraries = ['places'];
 
@@ -49,31 +57,29 @@ const App: React.FC = () => {
         libraries: libraries,
     });
 
-    const [selectedMarker, setSelectedMarker] = useState<Place | null>(null);
-    const [infoWindowVisible, setInfoWindowVisible] = useState<boolean>(false); // Add state to manage InfoWindow visibility
-    const [center, setCenter] = useState({ lat: 39.8283, lng: -98.5795 });
-    const [zoom, setZoom] = useState(4); // Initialize zoom level
-    const [map, setMap] = useState<google.maps.Map | null>(null); // Store map instance
-    const [viewing, setViewing] = useState<boolean>(false);
-    const [viewedMarker, setViewedMarker] = useState<Place | null>(null);
-    const [newsArticles, setNewsArticles] = useState<any[]>([]); // State to store news articles
-    const [queryCount, setQueryCount] = useState<{ [key: string]: number }>({}); // State to store query counts
-    const [totalQueries, setTotalQueries] = useState(0); // State to store total query count
-    const [sliderValue, setSliderValue] = useState(30); // State to store slider value, start at 30 (today's date)
-    const cache = useRef<{ [key: string]: any[] }>({}); // Cache to store fetched news articles
-    const [localityMarkers, setLocalityMarkers] = useState<Place[]>([]); // State to store locality markers
-    const [viewedArticles, setViewedArticles] = useState<any[]>([]);
-    const [selectedFilter, setSelectedFilter] = useState<number>(0);
-    const categories = [
-        'none', 'Travel', 'Environment', 'Health', 'Lifestyle', 'Politics'
-    ];
+        const [selectedMarker, setSelectedMarker] = useState<Place | null>(null);
+        const [infoWindowVisible, setInfoWindowVisible] = useState<boolean>(false); // Add state to manage InfoWindow visibility
+        const [center, setCenter] = useState({ lat: 39.8283, lng: -98.5795 });
+        const [zoom, setZoom] = useState(4); // Initialize zoom level
+        const [map, setMap] = useState<google.maps.Map | null>(null); // Store map instance
+        const [viewing, setViewing] = useState<boolean>(false);
+        const [viewedMarker, setViewedMarker] = useState<Place | null>(null);
+        const [newsArticles, setNewsArticles] = useState<any[]>([]); // State to store news articles
+        const [queryCount, setQueryCount] = useState<{ [key: string]: number }>({}); // State to store query counts
+        const [totalQueries, setTotalQueries] = useState(0); // State to store total query count
+        const [sliderValue, setSliderValue] = useState(30); // State to store slider value, start at 30 (today's date)
+        const cache = useRef<{ [key: string]: any[] }>({}); // Cache to store fetched news articles
+        const [localityMarkers, setLocalityMarkers] = useState<Place[]>([]); // State to store locality markers
+        const [viewedArticles, setViewedArticles] = useState<any[]>([]);
+        const [selectedFilter, setSelectedFilter] = useState<number>(0)
+        const [showLogin, setShowLogin] = useState<boolean>(true);
+        const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
-    useEffect(() => {
-        console.log(zoom)
-        if (zoom < 10) {
-            setLocalityMarkers([]);
-        }
-    }, [zoom]);
+        useEffect(() => {
+            if (zoom < 10) {
+                setLocalityMarkers([]);
+            }
+        }, [zoom]);
 
     const fetchVisiblePlaces = useCallback(() => {
         if (map) {
@@ -215,84 +221,166 @@ const App: React.FC = () => {
         setInfoWindowVisible(true); // Ensure InfoWindow is visible after fetching news
     };
 
-    return isLoaded ? (
-        <div className="fade-in">
-            {(
-                <div style={{ position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', width: '80%', zIndex: 10 }}>
-                    <input
-                        type="range"
-                        min="0"
-                        max="30"
-                        value={sliderValue}
-                        onChange={(e) => setSliderValue(Number(e.target.value))} // Adjust the slider value
-                        style={{
-                            width: '100%',
-                            appearance: 'none',
-                            background: `linear-gradient(to right, purple 0%, orange ${(sliderValue / 30) * 100}%, black ${(sliderValue / 30) * 100}%, black 100%)`,
-                            height: '8px',
-                            borderRadius: '5px',
-                            outline: 'none',
-                            opacity: '0.7',
-                            transition: 'opacity .15s ease-in-out'
-                        }}
-                    />
-                    <style>
-                        {`
-                        input[type="range"]::-webkit-slider-thumb {
-                            appearance: none;
-                            width: 25px;
-                            height: 25px;
-                            border-radius: 50%;
-                            background: white;
-                            cursor: pointer;
-                        }
-                        input[type="range"]::-moz-range-thumb {
-                            width: 25px;
-                            height: 25px;
-                            border-radius: 50%;
-                            background: white;
-                            cursor: pointer;
-                        }
-                        `}
-                    </style>
-                    <div style={{ textAlign: 'center', color: 'white' }}>
-                        {`Showing news from: ${getDateFromSliderValue(sliderValue)}`}
+        return isLoaded ? (
+            <div className="fade-in" style={{display:'flex'}} >
+                {!isLoggedIn && <Login setClosed={setShowLogin} setIsLoggedIn={setIsLoggedIn}></Login>}
+                <div
+                style={{
+                  position: 'relative',
+                  top: 0,
+                  left: 0,
+                  backgroundColor: 'white',
+                  padding: 10,
+                  height: '100vh',
+                  width: '120px',
+                  overflow: 'hidden',
+                  color: "black",
+                }}
+              >
+
+                  <div className="filters-container" style={{display:'flex', flexDirection: 'column', margin:'auto', width:"100%", justifyContent:"center", height:'100%', overflowY:'auto', overflowX:'hidden'}}>
+                  <div key={-1}
+                              className={"filter-item "}
+                              onClick={() => {
+                                  navigator.geolocation.getCurrentPosition((p) => {
+                                    console.log(p.coords, center)
+                                    setCenter({lat: p.coords.latitude, lng: p.coords.longitude});
+                                  })
+                                  setZoom(13);
+                              }}
+                              style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
+                          >
+                            <LocationSearchingIcon/>
+                        Me
                     </div>
-                    <div className="filters-container">
-                        {filters.map((title: string, index: number) =>
-                            <div key={index}
-                                className={"filter-item " + (selectedFilter === index ? "selected-filter" : "")}
-                                onClick={() => {
-                                    setSelectedFilter(index);
-                                    setZoom(4);
-                                }}
-                            >
-                            {title}
-                            </div>)}
+                  <div style={{backgroundColor: 'lightgray', height:'2px', width:'80px', marginTop:'10px', marginBottom:'10px'}}></div>
+                  <div key={0}
+                              className={"filter-item " + (selectedFilter === 0 ? "selected-filter" : "")}
+                              onClick={() => {
+                                  setSelectedFilter(0);
+                              }}
+                              style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
+                          >
+                            <TravelExploreIcon/>
+                        All
                     </div>
-                </div>
-            )}
-            <GoogleMap
-                mapContainerStyle={containerStyle} // Set the container size
-                center={center} // Set the center of the map
-                zoom={zoom} // Adjust zoom level to show the states
-                options={mapOptions} // Pass map options (e.g., disable controls, etc.)
-                onLoad={onLoad} // Handle map load event to get map instance
-                onZoomChanged={() => setZoom(map?.getZoom() || 4)}
-            >
-                {statePlaces.map((m) => (
-                    <Marker
-                        key={m.name}
-                        position={{ lat: m.lat, lng: m.lng }}
-                        title={m.name}
-                        onClick={() => {
-                            setSelectedMarker(m);
-                            fetchNews(m); // Fetch news for the selected marker
-                            setCenter({ lat: m.lat, lng: m.lng });
-                            setZoom(8);
-                        }} // Set the selected state on marker click
-                    />
-                ))}
+                    <div key={1}
+                              className={"filter-item " + (selectedFilter === 1 ? "selected-filter" : "")}
+                              onClick={() => {
+                                  setSelectedFilter(1);
+                              }}
+                              style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
+                          >
+                            <LocalTaxiIcon/>
+                        Local
+                    </div>
+                    <div key={2}
+                              className={"filter-item " + (selectedFilter === 2 ? "selected-filter" : "")}
+                              onClick={() => {
+                                  setSelectedFilter(2);
+                              }}
+                              style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
+                          >
+                            <GiteIcon/>
+                        Real Estate
+                    </div>
+                    <div key={3}
+                              className={"filter-item " + (selectedFilter === 3 ? "selected-filter" : "")}
+                              onClick={() => {
+                                  setSelectedFilter(3);
+                              }}
+                              style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
+                          >
+                            <SportsBaseballIcon/>
+                        Sports
+                    </div>
+                    <div key={4}
+                              className={"filter-item " + (selectedFilter === 4 ? "selected-filter" : "")}
+                              onClick={() => {
+                                  setSelectedFilter(4);
+                              }}
+                              style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
+                          >
+                            <AccountBalanceIcon/>
+                        Finance
+                    </div>
+                    <div key={5}
+                              className={"filter-item " + (selectedFilter === 5 ? "selected-filter" : "")}
+                              onClick={() => {
+                                  setSelectedFilter(5);
+                              }}
+                              style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
+                          >
+                            <GavelIcon/>
+                        Politics
+                    </div>
+
+
+                  </div>
+              </div>
+                <div style={{width:"100%", right:"0px", position:"relative", display: 'flex'}}>
+                <div style={{ position: 'absolute', top: '20px', width: '90%', zIndex: 10, margin:'auto' }}>
+                        <input
+                            type="range"
+                            min="0"
+                            max="30"
+                            value={sliderValue}
+                            onChange={(e) => setSliderValue(Number(e.target.value))} // Adjust the slider value
+                            style={{
+                                width: '100%',
+                                appearance: 'none',
+                                background: `linear-gradient(to right, purple 0%, orange ${(sliderValue / 30) * 100}%, black ${(sliderValue / 30) * 100}%, black 100%)`,
+                                height: '8px',
+                                borderRadius: '5px',
+                                outline: 'none',
+                                opacity: '0.7',
+                                transition: 'opacity .15s ease-in-out'
+                            }}
+                        />
+                        <style>
+                            {`
+                            input[type="range"]::-webkit-slider-thumb {
+                                appearance: none;
+                                width: 25px;
+                                height: 25px;
+                                border-radius: 50%;
+                                background: white;
+                                cursor: pointer;
+                            }
+                            input[type="range"]::-moz-range-thumb {
+                                width: 25px;
+                                height: 25px;
+                                border-radius: 50%;
+                                background: white;
+                                cursor: pointer;
+                            }
+                            `}
+                        </style>
+                        <div style={{ textAlign: 'center', color: 'white' }}>
+                            {`Gathering news from: ${getDateFromSliderValue(sliderValue)}`}
+                        </div>
+                    </div>
+                <GoogleMap
+                    mapContainerStyle={containerStyle} // Set the container size
+                    center={center} // Set the center of the map
+                    zoom={zoom} // Adjust zoom level to show the states
+                    options={mapOptions} // Pass map options (e.g., disable controls, etc.)
+                    onLoad={onLoad} // Handle map load event to get map instance
+                    onZoomChanged={() => setZoom(map?.getZoom() || 4)}
+                >
+                    {statePlaces.map((m) => (
+                        <Marker
+                            key={m.name}
+                            position={{ lat: m.lat, lng: m.lng }}
+                            title={m.name}
+                            onClick={() => {
+                                setSelectedMarker(m);
+                                fetchNews(m); // Fetch news for the selected marker
+                                setCenter({ lat: m.lat, lng: m.lng });
+                                setZoom(8);
+                            }} // Set the selected state on marker click
+                        />
+                    ))}
 
                 {localityMarkers.map((m, index) => (
                     <Marker
@@ -308,42 +396,44 @@ const App: React.FC = () => {
                     />
                 ))}
 
-                {selectedMarker && infoWindowVisible && (
-                    <InfoWindowF
-                        position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
-                        onCloseClick={() => { setSelectedMarker(null); setViewing(false); setInfoWindowVisible(false); }}
-                    >
-                        <div style={{width:"20vw", maxHeight:"40vh"}}>
-                            <button onClick={() => { setViewing(true); setViewedMarker(selectedMarker); setViewedArticles(newsArticles)}}>show details</button>
-                            <h3>{selectedMarker.name}</h3>
-                            <NewsTitles articles={viewedArticles} /> {/* Display news articles in InfoWindow */}
-                        </div>
-                    </InfoWindowF>
-                )}
-            </GoogleMap>
-            <div
-                style={{
-                    position: 'absolute',
-                    top: '5vh',
-                    right: viewing ? '5vw' : '-40vw',
-                    backgroundColor: 'white',
-                    padding: 10,
-                    height: '80vh',
-                    width: '30vw',
-                    overflowY: 'scroll',
-                    color: "black",
-                    transition: '1s',
-                }}
-            >
-                <button onClick={() => setViewing(false)}>exit</button>
-                <h3>{viewedMarker?.name}</h3>
-                <p>{viewedMarker?.content}</p>
-                <NewsApp articles={viewedArticles} /> {/* Pass news articles to NewsApp */}
+                    {selectedMarker && infoWindowVisible && (
+                        <InfoWindow
+                            position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
+                            onCloseClick={() => { setSelectedMarker(null); setViewing(false); setInfoWindowVisible(false); }}
+                        >
+                            <div style={{width:"20vw", maxHeight:"40vh"}}>
+                                <button onClick={() => { setViewing(true); setViewedMarker(selectedMarker); setViewedArticles(newsArticles)}}>show details</button>
+                                <h3>{selectedMarker.name}</h3>
+                                <NewsTitles articles={newsArticles} /> {/* Display news articles in InfoWindow */}
+                            </div>
+                        </InfoWindow>
+                    )}
+                </GoogleMap>
+                </div>
+
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: '5vh',
+                        right: viewing ? '5vw' : '-40vw',
+                        backgroundColor: 'white',
+                        padding: 10,
+                        height: '80vh',
+                        width: '30vw',
+                        overflowY: 'scroll',
+                        color: "black",
+                        transition: '1s',
+                    }}
+                >
+                    <button onClick={() => setViewing(false)}>exit</button>
+                    <h3>{viewedMarker?.name}</h3>
+                    <p>{viewedMarker?.content}</p>
+                    <NewsApp articles={viewedArticles} /> {/* Pass news articles to NewsApp */}
+                </div>
             </div>
-        </div>
-    ) : (
-        <div>Loading...</div> // Show loading indicator while the map is loading
-    );
-};
+        ) : (
+            <div>Loading...</div> // Show loading indicator while the map is loading
+        );
+    };
 
 export default App;
