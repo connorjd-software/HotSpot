@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow, Libraries } from '@react-google-maps/api';
 import { mapOptions, stateCenters } from './MapOptions.ts'; // Import the options and state centers
 import { stateNameToAbbreviation } from "./MapOptions.ts";
-import NewsApp from './news'; // Import NewsApp component
+import { NewsApp, NewsTitles } from './news'; // Import NewsApp component
 import axios from 'axios'; // Import axios for fetching news
 import './App.css';
 
@@ -61,6 +61,7 @@ const App: React.FC = () => {
     const cache = useRef<{ [key: string]: any[] }>({}); // Cache to store fetched news articles
     const [sliderEnabled, setSliderEnabled] = useState(true); // State to toggle slider visibility and functionality
     const [localityMarkers, setLocalityMarkers] = useState<Place[]>([]); // State to store locality markers
+    const [viewedArticles, setViewedArticles] = useState<any[]>([]);
 
     useEffect(() => {
         console.log(zoom)
@@ -303,9 +304,10 @@ const App: React.FC = () => {
                         position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
                         onCloseClick={() => { setSelectedMarker(null); setViewing(false); }}
                     >
-                        <div onClick={() => { setViewing(true); setViewedMarker(selectedMarker); }}>
+                        <div style={{width:"20vw", maxHeight:"40vh"}}>
+                            <button onClick={() => { setViewing(true); setViewedMarker(selectedMarker); setViewedArticles(newsArticles)}}>show details</button>
                             <h3>{selectedMarker.name}</h3>
-                            <NewsApp articles={newsArticles} /> {/* Display news articles in InfoWindow */}
+                            <NewsTitles articles={newsArticles} /> {/* Display news articles in InfoWindow */}
                         </div>
                     </InfoWindow>
                 )}
@@ -327,7 +329,7 @@ const App: React.FC = () => {
                 <button onClick={() => setViewing(false)}>exit</button>
                 <h3>{viewedMarker?.name}</h3>
                 <p>{viewedMarker?.content}</p>
-                <NewsApp articles={newsArticles} /> {/* Pass news articles to NewsApp */}
+                <NewsApp articles={viewedArticles} /> {/* Pass news articles to NewsApp */}
             </div>
         </div>
     ) : (
