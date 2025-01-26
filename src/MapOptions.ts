@@ -305,7 +305,10 @@ export const mapOptions = {
                 }
             ]
         }
-    ]
+    ],
+    disableDefaultUI: true, // Disable all default UI
+    zoomControl: false, // Disable zoom control
+    // ...other map options...
 };
 
 

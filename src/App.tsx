@@ -29,6 +29,7 @@ const statePlaces = stateCenters.map((sc) => {
         name: sc.name,
         content: "state description",
         time: 0,
+        type: "state"
     } as Place
 });
 
@@ -58,8 +59,16 @@ const App: React.FC = () => {
     const [totalQueries, setTotalQueries] = useState(0); // State to store total query count
     const [sliderValue, setSliderValue] = useState(30); // State to store slider value, start at 30 (today's date)
     const cache = useRef<{ [key: string]: any[] }>({}); // Cache to store fetched news articles
+    const [sliderEnabled, setSliderEnabled] = useState(true); // State to toggle slider visibility and functionality
     const [localityMarkers, setLocalityMarkers] = useState<Place[]>([]); // State to store locality markers
     const [viewedArticles, setViewedArticles] = useState<any[]>([]);
+
+    useEffect(() => {
+        console.log(zoom)
+        if (zoom < 6) {
+            setLocalityMarkers([]);
+        }
+    }, [zoom]);
 
     const fetchVisiblePlaces = useCallback(() => {
         if (map) {
@@ -74,22 +83,50 @@ const App: React.FC = () => {
                     },
                     (results, status) => {
                         if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-                            const placeMarkers = results.map((place) => ({
-                                lat: place.geometry?.location?.lat() || 0,
-                                lng: place.geometry?.location?.lng() || 0,
-                                name: place.name || 'Unknown Name',
-                                content: place.vicinity || 'Unknown Address',
-                                time: Date.now(),
-                            }));
-                            setLocalityMarkers((prev) => [...prev, ...placeMarkers]); // Add new markers
+                            results.forEach((place) => {
+                                // Fetch detailed information for each place to extract state
+                                // @ts-ignore
+                                service.getDetails({ placeId: place.place_id }, (details, detailsStatus) => {
+                                    if (detailsStatus === google.maps.places.PlacesServiceStatus.OK) {
+                                        // @ts-ignore
+                                        const state: any = getStateFromAddressComponents(details.address_components);
+
+                                        // Create marker data with state
+                                        const placeMarker = {
+                                            lat: place.geometry?.location?.lat() || 0,
+                                            lng: place.geometry?.location?.lng() || 0,
+                                            name: place.name || "Unknown Name",
+                                            content: place.vicinity || "Unknown Address",
+                                            type: "city",
+                                            state: state || "Unknown State", // Add state here
+                                            time: Date.now(),
+                                        };
+
+                                        // Add the marker to the state
+                                        setLocalityMarkers((prev) => [...prev, placeMarker]);
+                                    } else {
+                                        console.error("Place details fetch failed:", detailsStatus);
+                                    }
+                                });
+                            });
                         } else {
-                            console.error('Places search failed:', status);
+                            console.error("Places search failed:", status);
                         }
                     }
                 );
             }
         }
     }, [map]);
+
+// Helper Function to Extract State from Address Components
+    function getStateFromAddressComponents(addressComponents: google.maps.GeocoderAddressComponent[]) {
+        for (let component of addressComponents) {
+            if (component.types.includes("administrative_area_level_1")) {
+                return component.long_name; // Full state name
+            }
+        }
+    }
+
 
     useEffect(() => {
         if (map) {
@@ -166,47 +203,66 @@ const App: React.FC = () => {
 
     return isLoaded ? (
         <div>
-            <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', width: '80%', zIndex: 10 }}>
-                <input
-                    type="range"
-                    min="0"
-                    max="30"
-                    value={sliderValue}
-                    onChange={(e) => setSliderValue(Number(e.target.value))} // Adjust the slider value
-                    style={{
-                        width: '100%',
-                        appearance: 'none',
-                        background: `linear-gradient(to right, purple 0%, orange ${(sliderValue / 30) * 100}%, black ${(sliderValue / 30) * 100}%, black 100%)`,
-                        height: '8px',
-                        borderRadius: '5px',
-                        outline: 'none',
-                        opacity: '0.7',
-                        transition: 'opacity .15s ease-in-out'
-                    }}
-                />
-                <style>
-                    {`
-                    input[type="range"]::-webkit-slider-thumb {
-                        appearance: none;
-                        width: 25px;
-                        height: 25px;
-                        border-radius: 50%;
-                        background: white;
-                        cursor: pointer;
-                    }
-                    input[type="range"]::-moz-range-thumb {
-                        width: 25px;
-                        height: 25px;
-                        border-radius: 50%;
-                        background: white;
-                        cursor: pointer;
-                    }
-                    `}
-                </style>
-                <div style={{ textAlign: 'center', color: 'white' }}>
-                    {`Showing news from: ${getDateFromSliderValue(sliderValue)}`}
+            {sliderEnabled && (
+                <div style={{ position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', width: '80%', zIndex: 10 }}>
+                    <input
+                        type="range"
+                        min="0"
+                        max="30"
+                        value={sliderValue}
+                        onChange={(e) => setSliderValue(Number(e.target.value))} // Adjust the slider value
+                        style={{
+                            width: '100%',
+                            appearance: 'none',
+                            background: `linear-gradient(to right, purple 0%, orange ${(sliderValue / 30) * 100}%, black ${(sliderValue / 30) * 100}%, black 100%)`,
+                            height: '8px',
+                            borderRadius: '5px',
+                            outline: 'none',
+                            opacity: '0.7',
+                            transition: 'opacity .15s ease-in-out'
+                        }}
+                    />
+                    <style>
+                        {`
+                        input[type="range"]::-webkit-slider-thumb {
+                            appearance: none;
+                            width: 25px;
+                            height: 25px;
+                            border-radius: 50%;
+                            background: white;
+                            cursor: pointer;
+                        }
+                        input[type="range"]::-moz-range-thumb {
+                            width: 25px;
+                            height: 25px;
+                            border-radius: 50%;
+                            background: white;
+                            cursor: pointer;
+                        }
+                        `}
+                    </style>
+                    <div style={{ textAlign: 'center', color: 'white' }}>
+                        {`Showing news from: ${getDateFromSliderValue(sliderValue)}`}
+                    </div>
                 </div>
-            </div>
+            )}
+            <button
+                onClick={() => setSliderEnabled(!sliderEnabled)}
+                style={{
+                    position: 'absolute',
+                    top: sliderEnabled ? '70px' : '20px',
+                    left: '10px',
+                    zIndex: 10,
+                    padding: '10px',
+                    backgroundColor: 'white',
+                    border: 'none',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold'
+                }}
+            >
+                {sliderEnabled ? 'Hide Slider' : 'Show Slider'}
+            </button>
             <GoogleMap
                 mapContainerStyle={containerStyle} // Set the container size
                 center={center} // Set the center of the map
