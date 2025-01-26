@@ -1,16 +1,15 @@
 
 import React, { useState, useCallback, useRef } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Login from './components/Login.tsx';
+import ResetPassword from './components/ResetPassword.tsx';
+import SignUpForm from './components/SignUpForm.tsx';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { mapOptions, stateCenters } from './MapOptions.ts'; // Import the options and state centers
 import {stateNameToAbbreviation} from "./MapOptions.ts";
 import NewsApp from './news'; // Import NewsApp component
 import axios from 'axios'; // Import axios for fetching news
 import './App.css';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import Login from './components/Login.tsx';
-import ResetPassword from './components/ResetPassword.tsx';
-import SignUpForm from './components/SignUpForm.tsx';
-
 
 const containerStyle = {
     width: '100%',
