@@ -29,6 +29,7 @@ const statePlaces = stateCenters.map((sc) => {
         name: sc.name,
         content: "state description",
         time: 0,
+        type: "state"
     } as Place
 });
 
@@ -80,6 +81,7 @@ const App: React.FC = () => {
                                 lng: place.geometry?.location?.lng() || 0,
                                 name: place.name || 'Unknown Name',
                                 content: place.vicinity || 'Unknown Address',
+                                type: "city",
                                 time: Date.now(),
                             }));
                             setLocalityMarkers((prev) => [...prev, ...placeMarkers]); // Add new markers
