@@ -22,6 +22,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import BackpackIcon from '@mui/icons-material/Backpack';
 import CreateIcon from '@mui/icons-material/Create';
+import CloseIcon from '@mui/icons-material/Close';
 
 import { readPost } from './components/FireBase';
 
@@ -90,6 +91,7 @@ const App: React.FC = () => {
         const [postMarkers, setPostMarkers] = useState<Place[]>([]);
         const [nearbyIndex, setNearbyIndex] = useState<number>(0);
         const [isPostFormVisible, setPostFormVisible] = useState(false);
+        const [navbarToggled, setNavbarToggled] = useState(true);
         const togglePostForm = () => {
             setPostFormVisible((prev) => !prev); // Toggle the visibility state
         };
@@ -280,7 +282,7 @@ const App: React.FC = () => {
                   zIndex:40
                 }}
                 >
-                
+                  <div style={{position:'absolute', left:'110px', color:'lightgray', zIndex: 10, top:'48vh', backgroundColor:'white', height:'40px', paddingTop:'7px', paddingLeft:'10px', borderRadius:'5px'}} onClick={() => setNavbarToggled(!navbarToggled)}>{navbarToggled?<ArrowBackIosNewIcon/>: <ArrowForwardIosIcon/>}</div>
                   <div className="filters-container" style={{display:'flex', flexDirection: 'column', margin:'auto', width:"100%", justifyContent:"center", height:'100%', overflowY:'auto', overflowX:'hidden'}}>
                   <div key={-1}
                               className={"filter-item "}
@@ -527,16 +529,11 @@ const App: React.FC = () => {
                         borderRadius:'10px'
                     }}
                 >
-                    <div style={{overflowY:'auto', height:'100%'}}>
-                    <button onClick={() => setViewing(false)}>exit</button>
+                    <div style={{overflowY:'auto', height:'100%', alignItems:'center', justifyItems:'center'}}>
+                    <div onClick={() => setViewing(false)} style={{float:'right'}}><CloseIcon/></div>
                         {
                         showPosts? <>
-                            {nearbyMarkers.map((m) => {
-                            return (<div>
-                                <div>{m.name}</div>
-                                <div>{m.content}</div>
-                            </div>)
-                            })}
+                            {nearbyList}
                         </>:
                         <>
                         <h3>{viewedMarker?.name}</h3>
