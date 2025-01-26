@@ -184,9 +184,11 @@ const App: React.FC = () => {
                         key={m.name}
                         position={{ lat: m.lat, lng: m.lng }}
                         title={m.name}
-                        onMouseOver={() => {
+                        onClick={() => {
                             setSelectedMarker(m);
                             fetchNews(m.name); // Fetch news for the selected marker
+                            setCenter({ lat: m.lat, lng: m.lng }); // Center the map on the selected marker
+                            setZoom(8); // Zoom in to the selected marker
                         }}  // Set the selected state on marker click
                     />
                 ))}
