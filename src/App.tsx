@@ -1,11 +1,12 @@
-import React, { useState, useCallback, useRef } from 'react';
-import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { GoogleMap, useJsApiLoader, Marker, InfoWindow, Libraries } from '@react-google-maps/api';
 import { mapOptions, stateCenters } from './MapOptions.ts'; // Import the options and state centers
-import {stateNameToAbbreviation} from "./MapOptions.ts";
+import { stateNameToAbbreviation } from "./MapOptions.ts";
 import NewsApp from './news'; // Import NewsApp component
 import axios from 'axios'; // Import axios for fetching news
 import './App.css';
 
+const libraries: Libraries = ['places'];
 
 const containerStyle = {
     width: '100%',
@@ -20,7 +21,7 @@ interface Place {
     time: number
 }
 
-//state markers for initial markers
+// State markers for initial markers
 const statePlaces = stateCenters.map((sc) => {
     return {
         lat: sc.lat,
@@ -40,23 +41,16 @@ const getDateFromSliderValue = (value: number) => {
 };
 
 const App: React.FC = () => {
-    /*  <BrowserRouter>
-    <Routes>
-        <Route path='/signup' element={<SignUpForm/>}/>
-        <Route path='/login' element={<Login/>}/>
-        <Route path='/reset-password' element={<ResetPassword/>}/>
-    </Routes>
-    </BrowserRouter> */
-    // Load the Google Maps script using the hook
     const { isLoaded } = useJsApiLoader({
         id: 'google-map-script',
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+        libraries: libraries,
     });
 
     const [selectedMarker, setSelectedMarker] = useState<Place | null>(null);
     const [center, setCenter] = useState({ lat: 39.8283, lng: -98.5795 });
-    const [zoom, setZoom] = useState(4);  // Initialize zoom level
-    const [map, setMap] = useState<google.maps.Map | null>(null);  // Store map instance
+    const [zoom, setZoom] = useState(4); // Initialize zoom level
+    const [map, setMap] = useState<google.maps.Map | null>(null); // Store map instance
     const [viewing, setViewing] = useState<boolean>(false);
     const [viewedMarker, setViewedMarker] = useState<Place | null>(null);
     const [newsArticles, setNewsArticles] = useState<any[]>([]); // State to store news articles
@@ -64,7 +58,48 @@ const App: React.FC = () => {
     const [totalQueries, setTotalQueries] = useState(0); // State to store total query count
     const [sliderValue, setSliderValue] = useState(30); // State to store slider value, start at 30 (today's date)
     const cache = useRef<{ [key: string]: any[] }>({}); // Cache to store fetched news articles
+
     const [sliderEnabled, setSliderEnabled] = useState(true); // State to toggle slider visibility and functionality
+    const [localityMarkers, setLocalityMarkers] = useState<Place[]>([]); // State to store locality markers
+
+    const fetchVisiblePlaces = useCallback(() => {
+        if (map) {
+            const bounds = map.getBounds(); // Get current map bounds
+            if (bounds) {
+                const service = new google.maps.places.PlacesService(map);
+
+                service.nearbySearch(
+                    {
+                        bounds: bounds, // Restrict search to current map bounds
+                        type: "locality",
+                    },
+                    (results, status) => {
+                        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                            const placeMarkers = results.map((place) => ({
+                                lat: place.geometry?.location?.lat() || 0,
+                                lng: place.geometry?.location?.lng() || 0,
+                                name: place.name || 'Unknown Name',
+                                content: place.vicinity || 'Unknown Address',
+                                time: Date.now(),
+                            }));
+                            setLocalityMarkers((prev) => [...prev, ...placeMarkers]); // Add new markers
+                        } else {
+                            console.error('Places search failed:', status);
+                        }
+                    }
+                );
+            }
+        }
+    }, [map]);
+
+    useEffect(() => {
+        if (map) {
+            const idleListener = map.addListener('idle', fetchVisiblePlaces);
+            return () => {
+                google.maps.event.removeListener(idleListener);
+            };
+        }
+    }, [map, fetchVisiblePlaces]);
 
     // Handle zoom changes
     const onZoomChanged = useCallback(() => {
@@ -72,12 +107,12 @@ const App: React.FC = () => {
             const newZoom = map.getZoom() || 4; // Get the current zoom level
             setZoom(newZoom); // Update the zoom state
         }
-    }, [map]);  // Ensure this depends on `map` state
+    }, [map]); // Ensure this depends on `map` state
 
     // Set map instance on load
     const onLoad = useCallback((mapInstance: google.maps.Map) => {
-        setMap(mapInstance);  // Set the map instance when the map is loaded
-        mapInstance.addListener("zoom_changed", onZoomChanged);  // Add zoom change listener
+        setMap(mapInstance); // Set the map instance when the map is loaded
+        mapInstance.addListener("zoom_changed", onZoomChanged); // Add zoom change listener
     }, [onZoomChanged]); // Only re-create the listener when `onZoomChanged` changes
 
     // Function to fetch news based on selected marker
@@ -193,11 +228,11 @@ const App: React.FC = () => {
                 {sliderEnabled ? 'Hide Slider' : 'Show Slider'}
             </button>
             <GoogleMap
-                mapContainerStyle={containerStyle}  // Set the container size
-                center={center}  // Set the center of the map
-                zoom={zoom}  // Adjust zoom level to show the states
-                options={mapOptions}  // Pass map options (e.g., disable controls, etc.)
-                onLoad={onLoad}  // Handle map load event to get map instance
+                mapContainerStyle={containerStyle} // Set the container size
+                center={center} // Set the center of the map
+                zoom={zoom} // Adjust zoom level to show the states
+                options={mapOptions} // Pass map options (e.g., disable controls, etc.)
+                onLoad={onLoad} // Handle map load event to get map instance
                 onZoomChanged={() => setZoom(map?.getZoom() || 4)}
             >
                 {statePlaces.map((m) => (
@@ -210,17 +245,29 @@ const App: React.FC = () => {
                             fetchNews(m.name); // Fetch news for the selected marker
                             setCenter({ lat: m.lat, lng: m.lng });
                             setZoom(8);
-                        }}  // Set the selected state on marker click
+                        }} // Set the selected state on marker click
                     />
                 ))}
 
-                {/* Display InfoWindow when a state marker is clicked */}
+                {localityMarkers.map((m, index) => (
+                    <Marker
+                        key={`locality-${index}`}
+                        position={{ lat: m.lat, lng: m.lng }}
+                        title={m.name}
+                        onClick={() => {
+                            setSelectedMarker(m);
+                            setCenter({ lat: m.lat, lng: m.lng });
+                            setZoom(10);
+                        }}
+                    />
+                ))}
+
                 {selectedMarker && (
                     <InfoWindow
                         position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
-                        onCloseClick={() => { setSelectedMarker(null); setViewing(false) }}
+                        onCloseClick={() => { setSelectedMarker(null); setViewing(false); }}
                     >
-                        <div onClick={() => { setViewing(true); setViewedMarker(selectedMarker) }}>
+                        <div onClick={() => { setViewing(true); setViewedMarker(selectedMarker); }}>
                             <h3>{selectedMarker.name}</h3>
                             <NewsApp articles={newsArticles} /> {/* Display news articles in InfoWindow */}
                         </div>
@@ -238,7 +285,7 @@ const App: React.FC = () => {
                     width: '30vw',
                     overflowY: 'scroll',
                     color: "black",
-                    transition: '1s'
+                    transition: '1s',
                 }}
             >
                 <button onClick={() => setViewing(false)}>exit</button>
@@ -248,7 +295,7 @@ const App: React.FC = () => {
             </div>
         </div>
     ) : (
-        <div>Loading...</div>  // Show loading indicator while the map is loading
+        <div>Loading...</div> // Show loading indicator while the map is loading
     );
 };
 
