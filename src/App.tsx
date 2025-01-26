@@ -1,12 +1,9 @@
-
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { GoogleMap, useJsApiLoader, Marker, InfoWindow, Libraries, InfoWindowF } from '@react-google-maps/api';
-import { mapOptions, stateCenters } from './MapOptions.ts'; // Import the options and state centers
-import { stateNameToAbbreviation } from "./MapOptions.ts";
-import { NewsApp, NewsTitles } from './news'; // Import NewsApp component
-import axios from 'axios'; // Import axios for fetching news
-import './App.css';
-
+    import React, { useState, useCallback, useRef, useEffect } from 'react';
+    import { GoogleMap, useJsApiLoader, Marker, InfoWindow, Libraries } from '@react-google-maps/api';
+    import { mapOptions, stateCenters, stateNameToAbbreviation, filters} from './MapOptions.ts'; // Import the options and state centers
+    import { NewsApp, NewsTitles } from './news'; // Import NewsApp component
+    import axios from 'axios'; // Import axios for fetching news
+    import './App.css';
 
     const libraries: Libraries = ['places'];
 
@@ -52,7 +49,6 @@ import './App.css';
             libraries: libraries,
         });
 
-
         const [selectedMarker, setSelectedMarker] = useState<Place | null>(null);
         const [infoWindowVisible, setInfoWindowVisible] = useState<boolean>(false); // Add state to manage InfoWindow visibility
         const [center, setCenter] = useState({ lat: 39.8283, lng: -98.5795 });
@@ -82,6 +78,7 @@ import './App.css';
                 // @ts-ignore
                 if (bounds && map.getZoom() && map.getZoom() >= 9) {
                     const service = new google.maps.places.PlacesService(map);
+
                     service.nearbySearch(
                         {
                             bounds: bounds, // Restrict search to current map bounds
@@ -157,7 +154,6 @@ import './App.css';
             mapInstance.addListener("zoom_changed", onZoomChanged); // Add zoom change listener
         }, [onZoomChanged]); // Only re-create the listener when `onZoomChanged` changes
 
-
         // Function to fetch news based on selected marker
         const fetchNews = async (marker: Place) => {
             const stateAbbreviation = stateNameToAbbreviation(marker.state || marker.name);
@@ -211,6 +207,7 @@ import './App.css';
             setTotalQueries((prev) => prev + 1); // Increment total query count
             setInfoWindowVisible(true); // Ensure InfoWindow is visible after fetching news
         };
+
         return isLoaded ? (
             <div className="fade-in">
                 {(
@@ -267,7 +264,6 @@ import './App.css';
                                 </div>)}
                         </div>
                     </div>
-
                 )}
                 <GoogleMap
                     mapContainerStyle={containerStyle} // Set the container size
