@@ -1,10 +1,17 @@
     import React, { useState, useCallback, useRef, useEffect } from 'react';
     import { GoogleMap, useJsApiLoader, Marker, InfoWindow, Libraries } from '@react-google-maps/api';
-    import { mapOptions, stateCenters, stateNameToAbbreviation, filters} from './MapOptions.ts';
+    import { mapOptions, stateCenters, stateNameToAbbreviation} from './MapOptions.ts';
     import Login from "./components/Login.tsx";
     import { NewsApp, NewsTitles } from './news'; // Import NewsApp component
     import axios from 'axios'; // Import axios for fetching news
     import './App.css';
+    import TravelExploreIcon from '@mui/icons-material/TravelExplore';
+    import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+    import LocalTaxiIcon from '@mui/icons-material/LocalTaxi';
+    import SportsBaseballIcon from '@mui/icons-material/SportsBaseball';
+    import GiteIcon from '@mui/icons-material/Gite';
+    import GavelIcon from '@mui/icons-material/Gavel';
+    import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
 
     const libraries: Libraries = ['places'];
 
@@ -211,10 +218,104 @@
         };
 
         return isLoaded ? (
-            <div className="fade-in">
-                {!isLoggedIn && showLogin && <Login setClosed={setShowLogin} setIsLoggedIn={setIsLoggedIn}></Login>}
-                {(
-                    <div style={{ position: 'absolute', top: '20px', left: '50%', transform: 'translateX(-50%)', width: '80%', zIndex: 1 }}>
+            <div className="fade-in" style={{display:'flex'}} >
+                {!isLoggedIn && !showLogin && <Login setClosed={setShowLogin} setIsLoggedIn={setIsLoggedIn}></Login>}
+                <div
+                style={{
+                  position: 'relative',
+                  top: 0,
+                  left: 0,
+                  backgroundColor: 'white',
+                  padding: 10,
+                  height: '100vh',
+                  width: '120px',
+                  overflow: 'hidden',
+                  color: "black",
+                }}
+              >
+
+                  <div className="filters-container" style={{display:'flex', flexDirection: 'column', margin:'auto', width:"100%", justifyContent:"center", height:'100%', overflowY:'auto', overflowX:'hidden'}}>
+                  <div key={-1}
+                              className={"filter-item "}
+                              onClick={() => {
+                                  navigator.geolocation.getCurrentPosition((p) => {
+                                    console.log(p.coords, center)
+                                    setCenter({lat: p.coords.latitude, lng: p.coords.longitude});
+                                  })
+                                  setZoom(13);
+                              }}
+                              style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
+                          >
+                            <LocationSearchingIcon/>
+                        Me
+                    </div>
+                  <div style={{backgroundColor: 'lightgray', height:'2px', width:'80px', marginTop:'10px', marginBottom:'10px'}}></div>
+                  <div key={0}
+                              className={"filter-item " + (selectedFilter === 0 ? "selected-filter" : "")}
+                              onClick={() => {
+                                  setSelectedFilter(0);
+                              }}
+                              style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
+                          >
+                            <TravelExploreIcon/>
+                        All
+                    </div>
+                    <div key={1}
+                              className={"filter-item " + (selectedFilter === 1 ? "selected-filter" : "")}
+                              onClick={() => {
+                                  setSelectedFilter(1);
+                              }}
+                              style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
+                          >
+                            <LocalTaxiIcon/>
+                        Local
+                    </div>
+                    <div key={2}
+                              className={"filter-item " + (selectedFilter === 2 ? "selected-filter" : "")}
+                              onClick={() => {
+                                  setSelectedFilter(2);
+                              }}
+                              style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
+                          >
+                            <GiteIcon/>
+                        Real Estate
+                    </div>
+                    <div key={3}
+                              className={"filter-item " + (selectedFilter === 3 ? "selected-filter" : "")}
+                              onClick={() => {
+                                  setSelectedFilter(3);
+                              }}
+                              style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
+                          >
+                            <SportsBaseballIcon/>
+                        Sports
+                    </div>
+                    <div key={4}
+                              className={"filter-item " + (selectedFilter === 4 ? "selected-filter" : "")}
+                              onClick={() => {
+                                  setSelectedFilter(4);
+                              }}
+                              style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
+                          >
+                            <AccountBalanceIcon/>
+                        Finance
+                    </div>
+                    <div key={5}
+                              className={"filter-item " + (selectedFilter === 5 ? "selected-filter" : "")}
+                              onClick={() => {
+                                  setSelectedFilter(5);
+                              }}
+                              style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
+                          >
+                            <GavelIcon/>
+                        Politics
+                    </div>
+
+
+                  </div>
+              </div>
+                <div style={{width:"100%", right:"0px", position:"relative", display: 'flex'}}>
+                <div style={{ position: 'absolute', top: '20px', width: '90%', zIndex: 10, margin:'auto' }}>
                         <input
                             type="range"
                             min="0"
@@ -254,20 +355,7 @@
                         <div style={{ textAlign: 'center', color: 'white' }}>
                             {`Gathering news from: ${getDateFromSliderValue(sliderValue)}`}
                         </div>
-                        <div className="filters-container">
-                            {filters.map((title: string, index: number) =>
-                                <div key={index}
-                                    className={"filter-item " + (selectedFilter === index ? "selected-filter" : "")}
-                                    onClick={() => {
-                                        setSelectedFilter(index);
-                                        setZoom(4);
-                                    }}
-                                >
-                                {title}
-                                </div>)}
-                        </div>
                     </div>
-                )}
                 <GoogleMap
                     mapContainerStyle={containerStyle} // Set the container size
                     center={center} // Set the center of the map
@@ -305,20 +393,20 @@
                     ))}
 
                     {selectedMarker && infoWindowVisible && (
-                        <div style={{position: "absolute", zIndex: 100000}}>
-                            <InfoWindow
-                                position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
-                                onCloseClick={() => { setSelectedMarker(null); setViewing(false); setInfoWindowVisible(false); }}
-                            >
-                                <div style={{width:"20vw", maxHeight:"40vh"}}>
-                                    <button onClick={() => { setViewing(true); setViewedMarker(selectedMarker); setViewedArticles(newsArticles)}}>show details</button>
-                                    <h3>{selectedMarker.name}</h3>
-                                    <NewsTitles articles={newsArticles} /> {/* Display news articles in InfoWindow */}
-                                </div>
-                            </InfoWindow>
-                        </div>
+                        <InfoWindow
+                            position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
+                            onCloseClick={() => { setSelectedMarker(null); setViewing(false); setInfoWindowVisible(false); }}
+                        >
+                            <div style={{width:"20vw", maxHeight:"40vh"}}>
+                                <button onClick={() => { setViewing(true); setViewedMarker(selectedMarker); setViewedArticles(newsArticles)}}>show details</button>
+                                <h3>{selectedMarker.name}</h3>
+                                <NewsTitles articles={newsArticles} /> {/* Display news articles in InfoWindow */}
+                            </div>
+                        </InfoWindow>
                     )}
                 </GoogleMap>
+                </div>
+
                 <div
                     style={{
                         position: 'absolute',
