@@ -49,6 +49,7 @@ const App: React.FC = () => {
     });
 
     const [selectedMarker, setSelectedMarker] = useState<Place | null>(null);
+    const [infoWindowVisible, setInfoWindowVisible] = useState<boolean>(false); // Add state to manage InfoWindow visibility
     const [center, setCenter] = useState({ lat: 39.8283, lng: -98.5795 });
     const [zoom, setZoom] = useState(4); // Initialize zoom level
     const [map, setMap] = useState<google.maps.Map | null>(null); // Store map instance
@@ -152,10 +153,10 @@ const App: React.FC = () => {
     }, [onZoomChanged]); // Only re-create the listener when `onZoomChanged` changes
 
     // Function to fetch news based on selected marker
-    const fetchNews = async (state: string) => {
-        const stateAbbreviation = stateNameToAbbreviation(state);
+    const fetchNews = async (marker: Place) => {
+        const stateAbbreviation = stateNameToAbbreviation(marker.state || marker.name);
         if (!stateAbbreviation) {
-            console.error(`Invalid state name: ${state}`);
+            console.error(`Invalid state name: ${marker.state || marker.name}`);
             return;
         }
 
@@ -164,10 +165,11 @@ const App: React.FC = () => {
             return;
         }
 
-        const cacheKey = stateAbbreviation + sliderValue;
+        const cacheKey = marker.type === "city" ? `${marker.name}-${stateAbbreviation}-${sliderValue}` : `${stateAbbreviation}-${sliderValue}`;
         if (cache.current[cacheKey]) {
             setNewsArticles(cache.current[cacheKey]);
             console.log(`Loaded from cache: ${cacheKey}`, cache.current[cacheKey]);
+            setInfoWindowVisible(true); // Ensure InfoWindow is visible after fetching news
             return;
         }
 
@@ -178,7 +180,9 @@ const App: React.FC = () => {
 
         const fromDate = getDateFromSliderValue(sliderValue);
         const apiKey = "02d69c3b-9e5e-4306-bf6b-4dc895d872fe"; // Replace with your actual API key
-        const url = `https://api.goperigon.com/v1/all?&country=us&language=en&state=${encodeURIComponent(stateAbbreviation)}&from=${fromDate}&apiKey=${apiKey}`;
+        const url = marker.type === "city"
+            ? `https://api.goperigon.com/v1/all?&country=us&language=en&state=${encodeURIComponent(stateAbbreviation)}&city=${encodeURIComponent(marker.name)}&from=${fromDate}&apiKey=${apiKey}`
+            : `https://api.goperigon.com/v1/all?&country=us&language=en&state=${encodeURIComponent(stateAbbreviation)}&from=${fromDate}&apiKey=${apiKey}`;
 
         try {
             const response = await axios.get(url);
@@ -199,6 +203,7 @@ const App: React.FC = () => {
             [cacheKey]: (prev[cacheKey] || 0) + 1,
         }));
         setTotalQueries((prev) => prev + 1); // Increment total query count
+        setInfoWindowVisible(true); // Ensure InfoWindow is visible after fetching news
     };
 
     return isLoaded ? (
@@ -278,7 +283,7 @@ const App: React.FC = () => {
                         title={m.name}
                         onClick={() => {
                             setSelectedMarker(m);
-                            fetchNews(m.name); // Fetch news for the selected marker
+                            fetchNews(m); // Fetch news for the selected marker
                             setCenter({ lat: m.lat, lng: m.lng });
                             setZoom(8);
                         }} // Set the selected state on marker click
@@ -292,16 +297,17 @@ const App: React.FC = () => {
                         title={m.name}
                         onClick={() => {
                             setSelectedMarker(m);
+                            fetchNews(m); // Fetch news for the selected marker
                             setCenter({ lat: m.lat, lng: m.lng });
                             setZoom(10);
                         }}
                     />
                 ))}
 
-                {selectedMarker && (
+                {selectedMarker && infoWindowVisible && (
                     <InfoWindow
                         position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
-                        onCloseClick={() => { setSelectedMarker(null); setViewing(false); }}
+                        onCloseClick={() => { setSelectedMarker(null); setViewing(false); setInfoWindowVisible(false); }}
                     >
                         <div style={{width:"20vw", maxHeight:"40vh"}}>
                             <button onClick={() => { setViewing(true); setViewedMarker(selectedMarker); setViewedArticles(newsArticles)}}>show details</button>
