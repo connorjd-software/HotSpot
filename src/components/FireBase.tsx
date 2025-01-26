@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth } from 'firebase/auth'
+import { getDatabase, ref, set } from "firebase/database";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -18,5 +19,32 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app)
-export { auth };
+const auth = getAuth(app);
+
+function writePost(
+    userId: string,
+    name: string,
+    content: string,
+    imgUrl: string, // List of image URLs (array of strings)
+    lat: number, // Latitude of the post location
+    lng: number  // Longitude of the post location
+) {
+    const db = getDatabase(app); // Initialize the database associated with the app
+    const reference = ref(db, `UsersPosts/${userId}`); // Path to store post under `posts/userId`
+    set(reference, {
+        username: name,
+        content: content,
+        imgUrl: imgUrl,
+        location: {
+            lat: lat,
+            lng: lng,
+        },
+        createdAt: new Date().toISOString(),    
+    }).then(() => {
+        console.log("Post successfully written to the database!");
+    }).catch((error) => {
+        console.error("Error writing post to the database:", error);
+    });
+}
+
+export { auth, writePost };
