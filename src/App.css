@@ -18,6 +18,7 @@ body {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    overflow-y: hidden;
 }
 
 .filter-item {

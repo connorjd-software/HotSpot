@@ -8,17 +8,13 @@ import axios from 'axios'; // Import axios for fetching news
 import './App.css';
 import TravelExploreIcon from '@mui/icons-material/TravelExplore';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import LocalTaxiIcon from '@mui/icons-material/LocalTaxi';
 import SportsBaseballIcon from '@mui/icons-material/SportsBaseball';
-import GiteIcon from '@mui/icons-material/Gite';
 import GavelIcon from '@mui/icons-material/Gavel';
 import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
 import CommentIcon from '@mui/icons-material/Comment';
 import NewspaperIcon from '@mui/icons-material/Newspaper';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import MoreIcon from '@mui/icons-material/More';
-import ClearIcon from '@mui/icons-material/Clear';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import BackpackIcon from '@mui/icons-material/Backpack';
 import CreateIcon from '@mui/icons-material/Create';
@@ -72,7 +68,9 @@ const App: React.FC = () => {
     });
 
         const [selectedMarker, setSelectedMarker] = useState<Place | null>(null);
-        const [infoWindowVisible, setInfoWindowVisible] = useState<boolean>(false); // Add state to manage InfoWindow visibility
+
+        // @ts-ignore
+    const [infoWindowVisible, setInfoWindowVisible] = useState<boolean>(false); // Add state to manage InfoWindow visibility
         const [center, setCenter] = useState({ lat: 39.8283, lng: -98.5795 });
         const [zoom, setZoom] = useState(4); // Initialize zoom level
         const [map, setMap] = useState<google.maps.Map | null>(null); // Store map instance
@@ -310,7 +308,7 @@ const App: React.FC = () => {
                     <div key={'posts'}
                               className={"filter-item "}
                               onClick={() => {
-                                  navigator.geolocation.getCurrentPosition((p) => {
+                                  navigator.geolocation.getCurrentPosition(() => {
                                     if (!showPosts){
                                       const newPosts: Place[] = []
                                       readPost((data) => {
