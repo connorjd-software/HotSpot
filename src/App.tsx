@@ -59,9 +59,15 @@ const App: React.FC = () => {
     const [totalQueries, setTotalQueries] = useState(0); // State to store total query count
     const [sliderValue, setSliderValue] = useState(30); // State to store slider value, start at 30 (today's date)
     const cache = useRef<{ [key: string]: any[] }>({}); // Cache to store fetched news articles
-
     const [sliderEnabled, setSliderEnabled] = useState(true); // State to toggle slider visibility and functionality
     const [localityMarkers, setLocalityMarkers] = useState<Place[]>([]); // State to store locality markers
+
+    useEffect(() => {
+        console.log(zoom)
+        if (zoom < 6) {
+            setLocalityMarkers([]);
+        }
+    }, [zoom]);
 
     const fetchVisiblePlaces = useCallback(() => {
         if (map) {
@@ -76,23 +82,50 @@ const App: React.FC = () => {
                     },
                     (results, status) => {
                         if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-                            const placeMarkers = results.map((place) => ({
-                                lat: place.geometry?.location?.lat() || 0,
-                                lng: place.geometry?.location?.lng() || 0,
-                                name: place.name || 'Unknown Name',
-                                content: place.vicinity || 'Unknown Address',
-                                type: "city",
-                                time: Date.now(),
-                            }));
-                            setLocalityMarkers((prev) => [...prev, ...placeMarkers]); // Add new markers
+                            results.forEach((place) => {
+                                // Fetch detailed information for each place to extract state
+                                // @ts-ignore
+                                service.getDetails({ placeId: place.place_id }, (details, detailsStatus) => {
+                                    if (detailsStatus === google.maps.places.PlacesServiceStatus.OK) {
+                                        // @ts-ignore
+                                        const state: any = getStateFromAddressComponents(details.address_components);
+
+                                        // Create marker data with state
+                                        const placeMarker = {
+                                            lat: place.geometry?.location?.lat() || 0,
+                                            lng: place.geometry?.location?.lng() || 0,
+                                            name: place.name || "Unknown Name",
+                                            content: place.vicinity || "Unknown Address",
+                                            type: "city",
+                                            state: state || "Unknown State", // Add state here
+                                            time: Date.now(),
+                                        };
+
+                                        // Add the marker to the state
+                                        setLocalityMarkers((prev) => [...prev, placeMarker]);
+                                    } else {
+                                        console.error("Place details fetch failed:", detailsStatus);
+                                    }
+                                });
+                            });
                         } else {
-                            console.error('Places search failed:', status);
+                            console.error("Places search failed:", status);
                         }
                     }
                 );
             }
         }
     }, [map]);
+
+// Helper Function to Extract State from Address Components
+    function getStateFromAddressComponents(addressComponents: google.maps.GeocoderAddressComponent[]) {
+        for (let component of addressComponents) {
+            if (component.types.includes("administrative_area_level_1")) {
+                return component.long_name; // Full state name
+            }
+        }
+    }
+
 
     useEffect(() => {
         if (map) {
