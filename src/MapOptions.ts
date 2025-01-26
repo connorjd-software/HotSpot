@@ -436,6 +436,6 @@ export const filters = [
     "Travel",
     "Environment",
     "Health",
-    "LifeStyle",
+    "Lifestyle",
     "Politics"
 ]
