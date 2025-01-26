@@ -83,7 +83,6 @@
                         {
                             bounds: bounds, // Restrict search to current map bounds
                             type: "locality",
-
                         },
                         (results, status) => {
                             if (status === google.maps.places.PlacesServiceStatus.OK && results) {
@@ -182,7 +181,7 @@
             }
 
             const fromDate = getDateFromSliderValue(sliderValue);
-            const apiKey = "02d69c3b-9e5e-4306-bf6b-4dc895d872fe"; // Replace with your actual API key
+            const apiKey = import.meta.env.VITE_NEWS_API_KEY;
             const url = marker.type === "city"
                 ? `https://api.goperigon.com/v1/all?&country=us&language=en&state=${encodeURIComponent(stateAbbreviation)}&city=${encodeURIComponent(marker.name)}&from=${fromDate}&apiKey=${apiKey}`
                 : `https://api.goperigon.com/v1/all?&country=us&language=en&state=${encodeURIComponent(stateAbbreviation)}&from=${fromDate}&apiKey=${apiKey}`;
