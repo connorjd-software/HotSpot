@@ -215,7 +215,7 @@ const App: React.FC = () => {
         }
 
         const fromDate = getDateFromSliderValue(sliderValue);
-        const apiKey = '';
+        const apiKey = import.meta.env.VITE_NEWS_API_KEY;
         const category = categories[selectedFilter] || 'none'; // Ensure category is set to 'none' if undefined
         const url = marker.type === "city"
             ? `https://api.goperigon.com/v1/all?&country=us&language=en&state=${encodeURIComponent(stateAbbreviation)}&city=${encodeURIComponent(marker.name)}&from=${fromDate}&category=${category}&apiKey=${apiKey}`
