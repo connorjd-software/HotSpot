@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindowF, Libraries } from '@react-google-maps/api';
-import { mapOptions, stateCenters, stateNameToAbbreviation} from './MapOptions.ts';
-import Login from "./components/Login.tsx";
+import { mapOptions, stateCenters, stateNameToAbbreviation } from './MapOptions';
+import Login from "./components/Login";
 import { NewsApp, NewsTitles } from './news'; // Import NewsApp component
 import axios from 'axios'; // Import axios for fetching news
 import './App.css';
@@ -12,53 +12,50 @@ import SportsBaseballIcon from '@mui/icons-material/SportsBaseball';
 import GiteIcon from '@mui/icons-material/Gite';
 import GavelIcon from '@mui/icons-material/Gavel';
 import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
-import CommentIcon from '@mui/icons-material/Comment';
-import NewspaperIcon from '@mui/icons-material/Newspaper';
-import { readPost } from './components/FireBase.tsx';
 
-    const libraries: Libraries = ['places'];
+const libraries: Libraries = ['places'];
 
-    const containerStyle = {
-        width: '100%',
-        height: '100vh',
-    };
+const containerStyle = {
+    width: '100%',
+    height: '100vh',
+};
 
-    interface Place {
-        lat: number,
-        lng: number,
-        name: string,
-        content: string,
-        time: string
-        state?: string,
-        type: string,
-    }
+interface Place {
+    lat: number,
+    lng: number,
+    name: string,
+    content: string,
+    time: number,
+    state?: string,
+    type: string,
+}
 
-    // State markers for initial markers
-    const statePlaces = stateCenters.map((sc) => {
-        return {
-            lat: sc.lat,
-            lng: sc.lng,
-            name: sc.name,
-            content: "state description",
-            time: "0",
-            type: "state"
-        } as Place
+// State markers for initial markers
+const statePlaces = stateCenters.map((sc) => {
+    return {
+        lat: sc.lat,
+        lng: sc.lng,
+        name: sc.name,
+        content: "state description",
+        time: 0,
+        type: "state"
+    } as Place
+});
+
+// Function to get the date string from the slider value
+const getDateFromSliderValue = (value: number) => {
+    const today = new Date();
+    const pastDate = new Date(today);
+    pastDate.setDate(today.getDate() - (30 - value)); // Adjust the date calculation
+    return pastDate.toISOString().split('T')[0];
+};
+
+const App: React.FC = () => {
+    const { isLoaded } = useJsApiLoader({
+        id: 'google-map-script',
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+        libraries: libraries,
     });
-
-    // Function to get the date string from the slider value
-    const getDateFromSliderValue = (value: number) => {
-        const today = new Date();
-        const pastDate = new Date(today);
-        pastDate.setDate(today.getDate() - (30 - value)); // Adjust the date calculation
-        return pastDate.toISOString().split('T')[0];
-    };
-
-    const App: React.FC = () => {
-        const { isLoaded } = useJsApiLoader({
-            id: 'google-map-script',
-            googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-            libraries: libraries,
-        });
 
         const [selectedMarker, setSelectedMarker] = useState<Place | null>(null);
         const [infoWindowVisible, setInfoWindowVisible] = useState<boolean>(false); // Add state to manage InfoWindow visibility
@@ -75,7 +72,6 @@ import { readPost } from './components/FireBase.tsx';
         const [localityMarkers, setLocalityMarkers] = useState<Place[]>([]); // State to store locality markers
         const [viewedArticles, setViewedArticles] = useState<any[]>([]);
         const [selectedFilter, setSelectedFilter] = useState<number>(0)
-        const [showLogin, setShowLogin] = useState<boolean>(true);
         const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
         const [showPosts, setShowPosts] = useState<boolean>(false);
         const [postMarkers, setPostMarkers] = useState<Place[]>([]);
@@ -86,145 +82,150 @@ import { readPost } from './components/FireBase.tsx';
             }
         }, [zoom]);
 
-        const fetchVisiblePlaces = useCallback(() => {
-            if (map) {
-                const bounds = map.getBounds(); // Get current map bounds
-                // @ts-ignore
-                if (bounds && map.getZoom() && map.getZoom() >= 9) {
-                    const service = new google.maps.places.PlacesService(map);
+    const fetchVisiblePlaces = useCallback(() => {
+        if (map) {
+            const bounds = map.getBounds(); // Get current map bounds
+            // @ts-ignore
+            if (bounds && map.getZoom() && map.getZoom() >= 9) {
+                const service = new google.maps.places.PlacesService(map);
 
-                    service.nearbySearch(
-                        {
-                            bounds: bounds, // Restrict search to current map bounds
-                            type: "locality",
-                        },
-                        (results, status) => {
-                            if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-                                results.forEach((place) => {
-                                    // Fetch detailed information for each place to extract state
-                                    // @ts-ignore
-                                    service.getDetails({ placeId: place.place_id }, (details, detailsStatus) => {
-                                        if (detailsStatus === google.maps.places.PlacesServiceStatus.OK) {
-                                            // @ts-ignore
-                                            const state: any = getStateFromAddressComponents(details.address_components);
+                service.nearbySearch(
+                    {
+                        bounds: bounds, // Restrict search to current map bounds
+                        type: "locality",
+                    },
+                    (results, status) => {
+                        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                            results.forEach((place) => {
+                                // Fetch detailed information for each place to extract state
+                                // @ts-ignore
+                                service.getDetails({ placeId: place.place_id }, (details, detailsStatus) => {
+                                    if (detailsStatus === google.maps.places.PlacesServiceStatus.OK) {
+                                        // @ts-ignore
+                                        const state: any = getStateFromAddressComponents(details.address_components);
 
-                                            // Create marker data with state
-                                            const placeMarker = {
-                                                lat: place.geometry?.location?.lat() || 0,
-                                                lng: place.geometry?.location?.lng() || 0,
-                                                name: place.name || "Unknown Name",
-                                                content: place.vicinity || "Unknown Address",
-                                                type: "city",
-                                                state: state || "Unknown State", // Add state here
-                                                time: Date.now(),
-                                            };
+                                        // Create marker data with state
+                                        const placeMarker = {
+                                            lat: place.geometry?.location?.lat() || 0,
+                                            lng: place.geometry?.location?.lng() || 0,
+                                            name: place.name || "Unknown Name",
+                                            content: place.vicinity || "Unknown Address",
+                                            type: "city",
+                                            state: state || "Unknown State", // Add state here
+                                            time: Date.now(),
+                                        };
 
-                                            // Add the marker to the state
-                                            setLocalityMarkers((prev) => [...prev, placeMarker]);
-                                        } else {
-                                            console.error("Place details fetch failed:", detailsStatus);
-                                        }
-                                    });
+                                        // Add the marker to the state
+                                        setLocalityMarkers((prev) => [...prev, placeMarker]);
+                                    } else {
+                                        console.error("Place details fetch failed:", detailsStatus);
+                                    }
                                 });
-                            } else {
-                                console.error("Places search failed:", status);
-                            }
+                            });
+                        } else {
+                            console.error("Places search failed:", status);
                         }
-                    );
-                }
-            }
-        }, [map]);
-
-    // Helper Function to Extract State from Address Components
-        function getStateFromAddressComponents(addressComponents: google.maps.GeocoderAddressComponent[]) {
-            for (let component of addressComponents) {
-                if (component.types.includes("administrative_area_level_1")) {
-                    return component.long_name; // Full state name
-                }
+                    }
+                );
             }
         }
+    }, [map]);
 
-
-        useEffect(() => {
-            if (map) {
-                const idleListener = map.addListener('idle', fetchVisiblePlaces);
-                return () => {
-                    google.maps.event.removeListener(idleListener);
-                };
+// Helper Function to Extract State from Address Components
+    function getStateFromAddressComponents(addressComponents: google.maps.GeocoderAddressComponent[]) {
+        for (let component of addressComponents) {
+            if (component.types.includes("administrative_area_level_1")) {
+                return component.long_name; // Full state name
             }
-        }, [map, fetchVisiblePlaces]);
+        }
+    }
 
-        // Handle zoom changes
-        const onZoomChanged = useCallback(() => {
-            if (map) {
-                const newZoom = map.getZoom() || 4; // Get the current zoom level
-                setZoom(newZoom); // Update the zoom state
-            }
-        }, [map]); // Ensure this depends on `map` state
 
-        // Set map instance on load
-        const onLoad = useCallback((mapInstance: google.maps.Map) => {
-            setMap(mapInstance); // Set the map instance when the map is loaded
-            mapInstance.addListener("zoom_changed", onZoomChanged); // Add zoom change listener
-        }, [onZoomChanged]); // Only re-create the listener when `onZoomChanged` changes
+    useEffect(() => {
+        if (map) {
+            const idleListener = map.addListener('idle', fetchVisiblePlaces);
+            return () => {
+                google.maps.event.removeListener(idleListener);
+            };
+        }
+    }, [map, fetchVisiblePlaces]);
 
-        // Function to fetch news based on selected marker
-        const fetchNews = async (marker: Place) => {
-            const stateAbbreviation = stateNameToAbbreviation(marker.state || marker.name);
-            if (!stateAbbreviation) {
-                console.error(`Invalid state name: ${marker.state || marker.name}`);
-                return;
-            }
+    // Handle zoom changes
+    const onZoomChanged = useCallback(() => {
+        if (map) {
+            const newZoom = map.getZoom() || 4; // Get the current zoom level
+            setZoom(newZoom); // Update the zoom state
+        }
+    }, [map]); // Ensure this depends on `map` state
 
-            if (totalQueries >= 5) {
-                console.log("Total query limit reached");
-                return;
-            }
+    // Set map instance on load
+    const onLoad = useCallback((mapInstance: google.maps.Map) => {
+        setMap(mapInstance); // Set the map instance when the map is loaded
+        mapInstance.addListener("zoom_changed", onZoomChanged); // Add zoom change listener
+    }, [onZoomChanged]); // Only re-create the listener when `onZoomChanged` changes
 
-            const cacheKey = marker.type === "city" ? `${marker.name}-${stateAbbreviation}-${sliderValue}` : `${stateAbbreviation}-${sliderValue}`;
-            if (cache.current[cacheKey]) {
-                setNewsArticles(cache.current[cacheKey]);
-                console.log(`Loaded from cache: ${cacheKey}`, cache.current[cacheKey]);
-                setInfoWindowVisible(true); // Ensure InfoWindow is visible after fetching news
-                return;
-            }
+    // Function to fetch news based on selected marker and category
+    const fetchNews = async (marker: Place) => {
+        const stateAbbreviation = stateNameToAbbreviation(marker.state || marker.name);
+        if (!stateAbbreviation) {
+            console.error(`Invalid state name: ${marker.state || marker.name}`);
+            return;
+        }
 
-            if (queryCount[cacheKey] && queryCount[cacheKey] >= 5) {
-                console.log(`Query limit reached for ${cacheKey}`);
-                return;
-            }
+        if (totalQueries >= 5) {
+            console.log("Total query limit reached");
+            return;
+        }
 
-            const fromDate = getDateFromSliderValue(sliderValue);
-            const apiKey = import.meta.env.VITE_NEWS_API_KEY;
-            const url = marker.type === "city"
-                ? `https://api.goperigon.com/v1/all?&country=us&language=en&state=${encodeURIComponent(stateAbbreviation)}&city=${encodeURIComponent(marker.name)}&from=${fromDate}&apiKey=${apiKey}`
-                : `https://api.goperigon.com/v1/all?&country=us&language=en&state=${encodeURIComponent(stateAbbreviation)}&from=${fromDate}&apiKey=${apiKey}`;
-
-            try {
-                const response = await axios.get(url);
-                if (response.data && response.data.articles && response.data.articles.length > 0) {
-                    setNewsArticles(response.data.articles); // Set the fetched articles
-                    cache.current[cacheKey] = response.data.articles; // Cache the articles
-                    console.log(`Loaded from API: ${cacheKey}`, response.data.articles);
-                } else {
-                    setNewsArticles([]);
-                    console.log(`No articles found for ${cacheKey}`);
-                }
-            } catch (err) {
-                console.error("Error fetching news:", err);
-            }
-
-            setQueryCount((prev) => ({
-                ...prev,
-                [cacheKey]: (prev[cacheKey] || 0) + 1,
-            }));
-            setTotalQueries((prev) => prev + 1); // Increment total query count
+        const categories = ["none", "Travel", "Sports", "Finance", "Politics"]; // Define categories array
+        const cacheKey = marker.type === "city" ? `${marker.name}-${stateAbbreviation}-${sliderValue}-${categories[selectedFilter]}` : `${stateAbbreviation}-${sliderValue}-${categories[selectedFilter]}`;
+        if (cache.current[cacheKey]) {
+            setNewsArticles(cache.current[cacheKey]);
+            console.log(`Loaded from cache: ${cacheKey}`, cache.current[cacheKey]);
             setInfoWindowVisible(true); // Ensure InfoWindow is visible after fetching news
-        };
+            setViewedArticles(cache.current[cacheKey]); // Set viewed articles to display in InfoWindow
+            return;
+        }
+
+        if (queryCount[cacheKey] && queryCount[cacheKey] >= 5) {
+            console.log(`Query limit reached for ${cacheKey}`);
+            return;
+        }
+
+        const fromDate = getDateFromSliderValue(sliderValue);
+        const apiKey = import.meta.env.VITE_NEWS_API_KEY;
+        const category = categories[selectedFilter] || 'none'; // Ensure category is set to 'none' if undefined
+        const url = marker.type === "city"
+            ? `https://api.goperigon.com/v1/all?&country=us&language=en&state=${encodeURIComponent(stateAbbreviation)}&city=${encodeURIComponent(marker.name)}&from=${fromDate}&category=${category}&apiKey=${apiKey}`
+            : `https://api.goperigon.com/v1/all?&country=us&language=en&state=${encodeURIComponent(stateAbbreviation)}&from=${fromDate}&category=${category}&apiKey=${apiKey}`;
+
+        try {
+            const response = await axios.get(url);
+            if (response.data && response.data.articles && response.data.articles.length > 0) {
+                setNewsArticles(response.data.articles); // Set the fetched articles
+                cache.current[cacheKey] = response.data.articles; // Cache the articles
+                console.log(`Loaded from API: ${cacheKey}`, response.data.articles);
+                setViewedArticles(response.data.articles); // Set viewed articles to display in InfoWindow
+            } else {
+                setNewsArticles([]);
+                console.log(`No articles found for ${cacheKey}`, response.data);
+                setViewedArticles([]); // Set viewed articles to empty if no articles found
+            }
+        } catch (err) {
+            console.error("Error fetching news:", err);
+        }
+
+        setQueryCount((prev) => ({
+            ...prev,
+            [cacheKey]: (prev[cacheKey] || 0) + 1,
+        }));
+        setTotalQueries((prev) => prev + 1); // Increment total query count
+        setInfoWindowVisible(true); // Ensure InfoWindow is visible after fetching news
+    };
 
         return isLoaded ? (
             <div className="fade-in" style={{display:'flex'}} >
-                {!isLoggedIn && <Login setClosed={setShowLogin} setIsLoggedIn={setIsLoggedIn}></Login>}
+                {!isLoggedIn && <Login setIsLoggedIn={setIsLoggedIn}></Login>}
                 <div
                 style={{
                   position: 'relative',
@@ -298,7 +299,7 @@ import { readPost } from './components/FireBase.tsx';
                             <TravelExploreIcon/>
                         All
                     </div>
-                    <div key={1}
+                    {/* <div key={1}
                               className={"filter-item " + (selectedFilter === 1 ? "selected-filter" : "")}
                               onClick={() => {
                                   setSelectedFilter(1);
@@ -307,21 +308,21 @@ import { readPost } from './components/FireBase.tsx';
                           >
                             <LocalTaxiIcon/>
                         Local
-                    </div>
+                    </div> */}
                     <div key={2}
-                              className={"filter-item " + (selectedFilter === 2 ? "selected-filter" : "")}
+                              className={"filter-item " + (selectedFilter === 1 ? "selected-filter" : "")}
                               onClick={() => {
-                                  setSelectedFilter(2);
+                                  setSelectedFilter(1);
                               }}
                               style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
                           >
                             <GiteIcon/>
-                        Real Estate
+                        Travel
                     </div>
                     <div key={3}
-                              className={"filter-item " + (selectedFilter === 3 ? "selected-filter" : "")}
+                              className={"filter-item " + (selectedFilter === 2 ? "selected-filter" : "")}
                               onClick={() => {
-                                  setSelectedFilter(3);
+                                  setSelectedFilter(2);
                               }}
                               style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
                           >
@@ -329,9 +330,9 @@ import { readPost } from './components/FireBase.tsx';
                         Sports
                     </div>
                     <div key={4}
-                              className={"filter-item " + (selectedFilter === 4 ? "selected-filter" : "")}
+                              className={"filter-item " + (selectedFilter === 3 ? "selected-filter" : "")}
                               onClick={() => {
-                                  setSelectedFilter(4);
+                                  setSelectedFilter(3);
                               }}
                               style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
                           >
@@ -339,9 +340,9 @@ import { readPost } from './components/FireBase.tsx';
                         Finance
                     </div>
                     <div key={5}
-                              className={"filter-item " + (selectedFilter === 5 ? "selected-filter" : "")}
+                              className={"filter-item " + (selectedFilter === 4 ? "selected-filter" : "")}
                               onClick={() => {
-                                  setSelectedFilter(5);
+                                  setSelectedFilter(4);
                               }}
                               style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
                           >
@@ -430,21 +431,21 @@ import { readPost } from './components/FireBase.tsx';
                         />
                     ))}
 
-                    {!showPosts && localityMarkers.map((m, index) => (
-                        <Marker
-                            key={`locality-${index}`}
-                            position={{ lat: m.lat, lng: m.lng }}
-                            title={m.name}
-                            onClick={() => {
-                                setSelectedMarker(m);
-                                fetchNews(m); // Fetch news for the selected marker
-                                setCenter({ lat: m.lat, lng: m.lng });
-                                setZoom(10);
-                            }}
-                        />
-                    ))}
+                {localityMarkers.map((m, index) => (
+                    <Marker
+                        key={`locality-${index}`}
+                        position={{ lat: m.lat, lng: m.lng }}
+                        title={m.name}
+                        onClick={() => {
+                            setSelectedMarker(m);
+                            fetchNews(m); // Fetch news for the selected marker
+                            setCenter({ lat: m.lat, lng: m.lng });
+                            setZoom(10);
+                        }}
+                    />
+                ))}
 
-                    {selectedMarker && (
+                    {selectedMarker && infoWindowVisible && (
                         <InfoWindowF
                             position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
                             onCloseClick={() => { setSelectedMarker(null); setViewing(false); setInfoWindowVisible(false); }}
@@ -484,4 +485,4 @@ import { readPost } from './components/FireBase.tsx';
         );
     };
 
-    export default App;
+export default App;

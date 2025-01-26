@@ -45,7 +45,7 @@ const SignUpForm = () => {
                     </label>
                     <button type='submit'>Create Account</button>
                 </form>
-                <p><Link to="/login">Already have an account</Link></p>
+                <p><Link to="/app">Already have an account</Link></p>
             </div>
         </div>
     )

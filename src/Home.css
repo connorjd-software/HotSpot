@@ -1,0 +1,220 @@
+/* General Styles */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+* {
+    font-family: 'Poppins', sans-serif !important;
+}
+body {
+    margin: 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+/* Light and Dark Mode Gradients */
+.light-mode {
+    background: linear-gradient(180deg, #dbeafe 0%, #3b82f6 50%, #1e3a8a 100%);
+    color: #333333;
+}
+
+.dark-mode {
+    background: linear-gradient(180deg, #000000 0%, #6a0572 50%, #1d2671 100%);
+    color: #ffffff;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .header {
+    background: linear-gradient(90deg, #6a0572 0%, #1d2671 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo h1 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+/* Links in Header */
+.header a {
+    text-decoration: none;
+    color: #ffffff;
+    margin: 0 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.light-mode .header a {
+    background-color: #2563eb;
+}
+
+.light-mode .header a:hover {
+    background-color: #1e40af; /* Darker blue on hover */
+}
+
+.dark-mode .header a {
+    background-color: #6a0572;
+}
+
+.dark-mode .header a:hover {
+    background-color: #53254b; /* Darker purple on hover */
+}
+
+/* Mode Toggle */
+.mode-toggle {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.light-mode .mode-toggle {
+    background-color: #2563eb;
+    color: #ffffff;
+}
+
+.dark-mode .mode-toggle {
+    background-color: #6a0572;
+    color: #ffffff;
+}
+
+/* Main Content */
+.main-content {
+    padding: 2rem;
+    background: linear-gradient(135deg, #3b82f6 0%, white 50%);
+    font-size: 1rem;
+}
+
+.dark-mode .main-content {
+    background: linear-gradient(135deg, #1d2671 0%, #000000 50%);
+}
+
+.welcome {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.welcome h2 {
+    font-size: 2.5rem;
+}
+
+/* Features Section */
+.features {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.feature {
+    margin-top: 3.5rem;
+    flex: 1 1 30%;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #bfdbfe 0%, #60a5fa 100%);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    text-align: center;
+}
+
+.dark-mode .feature {
+    background: linear-gradient(135deg, gray 0%, #3a3a3a 50%);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 1rem;
+    background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%);
+    color: #ffffff;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .footer {
+    background: linear-gradient(90deg, #6a0572 0%, #1d2671 100%);
+    color: #ffffff;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Typewriter Effect */
+.typewriter {
+    display: inline-block;
+    font-family: "Poppins", sans-serif;
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: inherit;
+    white-space: nowrap;
+    overflow: hidden; /* Hide the overflowing text */
+    border-right: 2px solid transparent;
+}
+
+/* Blinking Cursor */
+.typewriter-cursor {
+    display: inline-block;
+    background-color: transparent;
+    animation: blink 0.7s steps(1) infinite;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Join Section */
+.join {
+    text-align: center;
+    margin-top: 3rem; /* Add spacing from the content above */
+    text-transform: uppercase;
+}
+
+.join p {
+    font-size: 1.5rem; /* Increase font size for emphasis */
+    font-weight: 600; /* Make text bold */
+    margin: 0; /* Remove default margin */
+}
+
+.join a {
+    display: inline-block; /* Makes the link behave like a button */
+    text-decoration: none;
+    background-color: #2563eb;
+    color: #ffffff;
+    padding: 2rem 4rem; /* Add padding for a button-like feel */
+    border-radius: 10px; /* Rounded corners */
+    font-size: 1.2rem; /* Slightly larger font */
+    font-weight: 600; /* Bold font for better readability */
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.join a:hover {
+    background-color: #1e40af; /* Darker blue on hover */
+    transform: translateY(-3px); /* Slight lift effect on hover */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
+}
+
+.dark-mode .join a {
+    background-color: #53254b;
+}
+
+.dark-mode .join a:hover {
+    background-color: darkgrey; /* Darker purple on hover in dark mode */
+}

@@ -32,7 +32,7 @@ const ResetPassword = () => {
                     <input type="email" id="email" onChange={(e) => setEmail(e.target.value)} required/>
                     <button type='submit'>Send Reset Email</button>
                 </form>
-                <p><Link to="/login">Login</Link></p>
+                <p><Link to="/app">Login</Link></p>
             </div>
         </div>
     )

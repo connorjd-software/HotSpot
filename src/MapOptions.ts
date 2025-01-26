@@ -1,13 +1,13 @@
 export const mapOptions = {
-    restriction: { // ONLY ALLOW USA VIEW
-        latLngBounds: {
-            north: 49.384358, // Northernmost point of the contiguous US
-            south: 24.396308, // Southernmost point of the contiguous US
-            west: -145.0, // Westernmost point of the contiguous US
-            east: -46.93457 // Easternmost point of the contiguous US
-        },
-        strictBounds: false // Allow the user to pan outside the specified bounds (if needed)
-    },
+    // restriction: { // ONLY ALLOW USA VIEW
+    //     latLngBounds: {
+    //         north: 49.384358, // Northernmost point of the contiguous US
+    //         south: 24.396308, // Southernmost point of the contiguous US
+    //         west: -145.0, // Westernmost point of the contiguous US
+    //         east: -46.93457 // Easternmost point of the contiguous US
+    //     },
+    //     strictBounds: false // Allow the user to pan outside the specified bounds (if needed)
+    // },
     styles: [
         {
             "featureType": "all",
@@ -436,6 +436,6 @@ export const filters = [
     "Travel",
     "Environment",
     "Health",
-    "LifeStyle",
+    "Lifestyle",
     "Politics"
 ]
