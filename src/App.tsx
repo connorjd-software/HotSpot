@@ -72,7 +72,6 @@
         const [localityMarkers, setLocalityMarkers] = useState<Place[]>([]); // State to store locality markers
         const [viewedArticles, setViewedArticles] = useState<any[]>([]);
         const [selectedFilter, setSelectedFilter] = useState<number>(0)
-        const [showLogin, setShowLogin] = useState<boolean>(true);
         const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
         useEffect(() => {
@@ -219,7 +218,7 @@
 
         return isLoaded ? (
             <div className="fade-in" style={{display:'flex'}} >
-                {!isLoggedIn && <Login setClosed={setShowLogin} setIsLoggedIn={setIsLoggedIn}></Login>}
+                {!isLoggedIn && <Login setIsLoggedIn={setIsLoggedIn}></Login>}
                 <div
                 style={{
                   position: 'relative',

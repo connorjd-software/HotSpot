@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { FaSun, FaMoon } from "react-icons/fa"; // Icons for light and dark mode
 import "./Home.css";
 import { Link } from 'react-router-dom';

@@ -92,6 +92,7 @@
 
 .login-card form {
     margin-top: 8px;
+    margin-bottom: 0;
 }
 
 /* Links */
@@ -109,7 +110,7 @@
 .login-card p {
     font-size: 0.875rem;
     color: #6b7280; /* Gray-600 */
-    margin-top: 1rem;
+    margin-top: 0.5rem;
     text-transform: uppercase;
 }
 

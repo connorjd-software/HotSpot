@@ -7,7 +7,7 @@ import { GoogleAuthProvider } from "firebase/auth";
 
 const provider = new GoogleAuthProvider();
 
-const Login = ({ setClosed , setIsLoggedIn}: any) => {  // Receive setClosed as a prop
+const Login = ({ setIsLoggedIn}: any) => {  // Receive setClosed as a prop
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -21,7 +21,6 @@ const Login = ({ setClosed , setIsLoggedIn}: any) => {  // Receive setClosed as 
             console.log('Login successfully');
             setMessage('Login Successfully');
             setError('');
-            setClosed(false);  // Close the login when successful
         } catch (err: any) {
             if (err.code === 'auth/too-many-requests') {
                 setError('Too many attempts. Please wait and try again later.');
@@ -40,7 +39,6 @@ const Login = ({ setClosed , setIsLoggedIn}: any) => {  // Receive setClosed as 
             console.log('Google Sign-In successful');
             setMessage('Logged in with Google successfully');
             setError('');
-            setClosed(false);  // Close the login when successful
             setIsLoggedIn(true);
         } catch (err: any) {
             console.error('Google Sign-In failed', err.message);
@@ -81,7 +79,6 @@ const Login = ({ setClosed , setIsLoggedIn}: any) => {  // Receive setClosed as 
                         Sign in with Google
                     </button>
                     <div className="login-divider" onClick={() => {
-                        setClosed(false);
                         setIsLoggedIn(true);}}>
                         Continue without an account
                     </div>
