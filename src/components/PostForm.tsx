@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { writePost } from "./FireBase";
 import "./styles/PostForm.css";
-import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
+import { Autocomplete } from "@react-google-maps/api";
 
-const PostForm: React.FC = () => {
+const PostForm: React.FC<{ isLoaded: boolean }> = ({ isLoaded }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [imgUrl, setImgUrl] = useState("");
@@ -12,10 +12,7 @@ const PostForm: React.FC = () => {
   const [userLatLng, setUserLatLng] = useState<{ lat: number; lng: number } | null>(null); // User's current location
   const [autocomplete, setAutocomplete] = useState<google.maps.places.Autocomplete | null>(null);
   const [showLocationInput, setShowLocationInput] = useState(false);
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-    libraries: ["places"], // Load Places API
-  });
+  const [successMessage, setSuccessMessage] = useState<string | null>(null); // Success message state
 
   // Fetch user's current location
   useEffect(() => {
@@ -54,7 +51,6 @@ const PostForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Use user location if no location is specified
     const finalLatLng = latLng || userLatLng;
 
     if (!finalLatLng) {
@@ -77,19 +73,25 @@ const PostForm: React.FC = () => {
 
     console.log("Post added successfully!");
 
+    // Show success message
+    setSuccessMessage(`Now posted at "${location || `Latitude: ${finalLatLng.lat}, Longitude: ${finalLatLng.lng}`}"`);
+
     // Clear form fields
     setTitle("");
     setContent("");
     setImgUrl("");
     setLocation("");
     setLatLng(null);
+
+    // Clear the message after 5 seconds
+    setTimeout(() => setSuccessMessage(null), 5500);
   };
 
   if (!isLoaded) return <p>Loading...</p>;
 
   return (
     <form onSubmit={handleSubmit} className="post-form">
-      <label htmlFor="title" style={{color: "white"}}>
+      <label htmlFor="title" style={{ color: "white" }}>
         Title<span className="required">*</span>
       </label>
       <input
@@ -122,16 +124,6 @@ const PostForm: React.FC = () => {
           </Autocomplete>
         )}
       </div>
-      {latLng && (
-        <p>
-          Selected Location: Latitude: {latLng.lat}, Longitude: {latLng.lng}
-        </p>
-      )}
-      {/* {!latLng && userLatLng && (
-        <p>
-          Using Current Location: Latitude: {userLatLng.lat}, Longitude: {userLatLng.lng}
-        </p>
-      )} */}
       <textarea
         placeholder="Body"
         value={content}
@@ -150,6 +142,11 @@ const PostForm: React.FC = () => {
           Post
         </button>
       </div>
+      {successMessage && (
+        <div className="success-message" style={{ marginTop: "10px", color: "lightgreen" }}>
+          {successMessage}
+        </div>
+      )}
     </form>
   );
 };

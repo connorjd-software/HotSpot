@@ -7,7 +7,7 @@ import { GoogleAuthProvider } from "firebase/auth";
 
 const provider = new GoogleAuthProvider();
 
-const Login = ({ setIsLoggedIn}: any) => {  // Receive setClosed as a prop
+const Login = ({ setIsLoggedIn, setUser }: { setIsLoggedIn : any, setUser : any }) => {  // Receive setClosed as a prop
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -19,6 +19,8 @@ const Login = ({ setIsLoggedIn}: any) => {  // Receive setClosed as a prop
         try {
             await signInWithEmailAndPassword(auth, email, password);
             console.log('Login successfully');
+            setIsLoggedIn(true);
+            setUser(true);
             setMessage('Login Successfully');
             setError('');
         } catch (err: any) {
@@ -40,6 +42,7 @@ const Login = ({ setIsLoggedIn}: any) => {  // Receive setClosed as a prop
             setMessage('Logged in with Google successfully');
             setError('');
             setIsLoggedIn(true);
+            setUser(true);
         } catch (err: any) {
             console.error('Google Sign-In failed', err.message);
             setError('Google Sign-In Failed. Please try again.');
@@ -79,7 +82,9 @@ const Login = ({ setIsLoggedIn}: any) => {  // Receive setClosed as a prop
                         Sign in with Google
                     </button>
                     <div className="login-divider" onClick={() => {
-                        setIsLoggedIn(true);}}>
+                        setIsLoggedIn(true);
+                        setUser(false);
+                        }}>
                         Continue without an account
                     </div>
                 </form>

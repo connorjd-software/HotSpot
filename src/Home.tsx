@@ -95,7 +95,7 @@ const HomePage = () => {
         </section>
       </main>
 
-      <footer className="footer">
+      <footer className="footer" style={{paddingBottom:"5rem"}}>
         <p>&copy; 2025 HOTSPOT. All rights reserved.</p>
       </footer>
     </div>
