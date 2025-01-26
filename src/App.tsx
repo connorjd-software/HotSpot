@@ -217,7 +217,7 @@ const App: React.FC = () => {
         }
 
         const fromDate = getDateFromSliderValue(sliderValue);
-        const apiKey = 'f6940de1-82e3-407c-8c7b-884545820224';
+        const apiKey = '';
         const category = categories[selectedFilter] || 'none'; // Ensure category is set to 'none' if undefined
         const url = marker.type === "city"
             ? `https://api.goperigon.com/v1/all?&country=us&language=en&state=${encodeURIComponent(stateAbbreviation)}&city=${encodeURIComponent(marker.name)}&from=${fromDate}&category=${category}&apiKey=${apiKey}`
@@ -463,6 +463,8 @@ const App: React.FC = () => {
                             key={m.name}
                             position={{ lat: m.lat, lng: m.lng }}
                             title={m.name}
+                            label={BackpackIcon.muiName}
+                            icon={'https://maps.google.com/mapfiles/ms/icons/blue-dot.png'}
                             onClick={() => {
                                 setSelectedMarker(m);
                                 //fetchNews(m); // Fetch news for the selected marker
@@ -564,7 +566,25 @@ const App: React.FC = () => {
                     }}
                 >
                     <button
-                    onClick={() => {togglePostForm()}}
+                    onClick={() => {togglePostForm(); const newPosts: Place[] = []
+                      readPost((data) => {
+                        Object.keys(data).forEach((d) => {
+                          const p = data[d]
+                          const newPlace = {
+                            lat: p.location.lat,
+                            lng: p.location.lng,
+                            name: p.title,
+                            content: p.content,
+                            time: d,
+                            type: "state"
+                          } as unknown as Place
+                          newPosts.push(newPlace)
+                          
+                          //setPostMarkers([...postMarkers, newPlace])
+                        });
+                        setPostMarkers(newPosts)
+                        //console.log(newPosts)
+                      })}}
                     style={{
                         padding: '8px 12px',
                         backgroundColor: 'white',
