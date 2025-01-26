@@ -64,7 +64,7 @@ const App: React.FC = () => {
 
     useEffect(() => {
         console.log(zoom)
-        if (zoom < 6) {
+        if (zoom < 10) {
             setLocalityMarkers([]);
         }
     }, [zoom]);
@@ -72,7 +72,8 @@ const App: React.FC = () => {
     const fetchVisiblePlaces = useCallback(() => {
         if (map) {
             const bounds = map.getBounds(); // Get current map bounds
-            if (bounds) {
+            // @ts-ignore
+            if (bounds && map.getZoom() && map.getZoom() >= 10) {
                 const service = new google.maps.places.PlacesService(map);
 
                 service.nearbySearch(
