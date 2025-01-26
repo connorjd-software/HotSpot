@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useRef } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { mapOptions, stateCenters } from './MapOptions.ts'; // Import the options and state centers
@@ -88,6 +87,14 @@ const stateNameToAbbreviation = (stateName: string) => {
     return states[stateName] || '';
 };
 
+// Function to get the date string from the slider value
+const getDateFromSliderValue = (value: number) => {
+    const today = new Date();
+    const pastDate = new Date(today);
+    pastDate.setDate(today.getDate() - (30 - value)); // Adjust the date calculation
+    return pastDate.toISOString().split('T')[0];
+};
+
 const App: React.FC = () => {
     /*  <BrowserRouter>
     <Routes>
@@ -112,6 +119,7 @@ const App: React.FC = () => {
     const [newsArticles, setNewsArticles] = useState<any[]>([]); // State to store news articles
     const [queryCount, setQueryCount] = useState<{ [key: string]: number }>({}); // State to store query counts
     const [totalQueries, setTotalQueries] = useState(0); // State to store total query count
+    const [sliderValue, setSliderValue] = useState(30); // State to store slider value, start at 30 (today's date)
     const cache = useRef<{ [key: string]: any[] }>({}); // Cache to store fetched news articles
     const mapRef = useRef(null);
 
@@ -142,7 +150,7 @@ const App: React.FC = () => {
             return;
         }
 
-        const cacheKey = stateAbbreviation;
+        const cacheKey = stateAbbreviation + sliderValue;
         if (cache.current[cacheKey]) {
             setNewsArticles(cache.current[cacheKey]);
             console.log(`Loaded from cache: ${cacheKey}`, cache.current[cacheKey]);
@@ -154,8 +162,9 @@ const App: React.FC = () => {
             return;
         }
 
+        const fromDate = getDateFromSliderValue(sliderValue);
         const apiKey = "02d69c3b-9e5e-4306-bf6b-4dc895d872fe"; // Replace with your actual API key
-        const url = `https://api.goperigon.com/v1/all?&country=us&language=en&state=${encodeURIComponent(stateAbbreviation)}&from=2025-01-20&apiKey=${apiKey}`;
+        const url = `https://api.goperigon.com/v1/all?&country=us&language=en&state=${encodeURIComponent(stateAbbreviation)}&from=${fromDate}&apiKey=${apiKey}`;
 
         try {
             const response = await axios.get(url);
@@ -180,6 +189,47 @@ const App: React.FC = () => {
 
     return isLoaded ? (
         <div>
+            <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translateX(-50%)', width: '80%', zIndex: 10 }}>
+                <input
+                    type="range"
+                    min="0"
+                    max="30"
+                    value={sliderValue}
+                    onChange={(e) => setSliderValue(Number(e.target.value))} // Adjust the slider value
+                    style={{
+                        width: '100%',
+                        appearance: 'none',
+                        background: `linear-gradient(to right, purple 0%, orange ${(sliderValue / 30) * 100}%, black ${(sliderValue / 30) * 100}%, black 100%)`,
+                        height: '8px',
+                        borderRadius: '5px',
+                        outline: 'none',
+                        opacity: '0.7',
+                        transition: 'opacity .15s ease-in-out'
+                    }}
+                />
+                <style>
+                    {`
+                    input[type="range"]::-webkit-slider-thumb {
+                        appearance: none;
+                        width: 25px;
+                        height: 25px;
+                        border-radius: 50%;
+                        background: white;
+                        cursor: pointer;
+                    }
+                    input[type="range"]::-moz-range-thumb {
+                        width: 25px;
+                        height: 25px;
+                        border-radius: 50%;
+                        background: white;
+                        cursor: pointer;
+                    }
+                    `}
+                </style>
+                <div style={{ textAlign: 'center', color: 'white' }}>
+                    {`Showing news from: ${getDateFromSliderValue(sliderValue)}`}
+                </div>
+            </div>
             <GoogleMap
                 mapContainerStyle={containerStyle}  // Set the container size
                 center={center}  // Set the center of the map
