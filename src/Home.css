@@ -3,14 +3,11 @@
 * {
     font-family: 'Poppins', sans-serif !important;
 }
-
-html, body {
-    overflow: hidden;
-}
-
 body {
     margin: 0;
     transition: background-color 0.3s ease, color 0.3s ease;
+    overflow-x: hidden;
+    overflow-y: scroll;
 }
 
 /* Light and Dark Mode Gradients */
