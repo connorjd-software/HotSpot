@@ -49,7 +49,7 @@ function writePost(
     });
 }
 
-function readPost(callback){
+function readPost(callback: ((arg0: any) => void) | undefined){
     const db = getDatabase(app); // Initialize the database associated with the app
     const reference = ref(db, `UsersPosts`); // Path to store post under `posts/userId`
     onValue(reference, (s) => {

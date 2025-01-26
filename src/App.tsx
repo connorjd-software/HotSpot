@@ -12,6 +12,12 @@ import SportsBaseballIcon from '@mui/icons-material/SportsBaseball';
 import GiteIcon from '@mui/icons-material/Gite';
 import GavelIcon from '@mui/icons-material/Gavel';
 import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
+import CommentIcon from '@mui/icons-material/Comment';
+import NewspaperIcon from '@mui/icons-material/Newspaper';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+
+import { readPost } from './components/FireBase';
 
 const libraries: Libraries = ['places'];
 
@@ -75,6 +81,7 @@ const App: React.FC = () => {
         const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
         const [showPosts, setShowPosts] = useState<boolean>(false);
         const [postMarkers, setPostMarkers] = useState<Place[]>([]);
+        const [nearbyIndex, setNearbyIndex] = useState<number>(0);
 
         useEffect(() => {
             if (zoom < 10) {
@@ -222,6 +229,18 @@ const App: React.FC = () => {
         setTotalQueries((prev) => prev + 1); // Increment total query count
         setInfoWindowVisible(true); // Ensure InfoWindow is visible after fetching news
     };
+    const nearbyMarkers: Place[] = []    
+    if (showPosts && selectedMarker){
+          const lat1 = selectedMarker.lat
+          const lng1 = selectedMarker.lng
+
+          postMarkers.forEach((p) => {
+            if ( Math.abs(lat1 - p.lat) < 0.001 && Math.abs(lng1 - p.lng) < 0.001){
+              nearbyMarkers.push(p)
+            }
+          })
+          //console.log(postMarkers, nearbyMarkers)
+        }
 
         return isLoaded ? (
             <div className="fade-in" style={{display:'flex'}} >
@@ -264,14 +283,14 @@ const App: React.FC = () => {
                                       readPost((data) => {
                                         Object.keys(data).forEach((d) => {
                                           const p = data[d]
-                                          const newPlace =  {
+                                          const newPlace = {
                                             lat: p.location.lat,
                                             lng: p.location.lng,
                                             name: p.title,
                                             content: p.content,
-                                            time: "0",
+                                            time: d,
                                             type: "state"
-                                          } as Place
+                                          } as unknown as Place
                                           newPosts.push(newPlace)
                                           
                                           //setPostMarkers([...postMarkers, newPlace])
@@ -282,6 +301,7 @@ const App: React.FC = () => {
                                     }
                                   });
                                   setShowPosts(!showPosts);
+                                  setSelectedMarker(null)
                               }}
                               style={{padding:"10px", margin:"10px", display:'flex', flexDirection:'column'}}
                           >
@@ -412,7 +432,7 @@ const App: React.FC = () => {
                                 setSelectedMarker(m);
                                 //fetchNews(m); // Fetch news for the selected marker
                                 setCenter({ lat: m.lat, lng: m.lng });
-                                setZoom(13);
+                                setZoom(15);
                             }} // Set the selected state on marker click
                         />
                     ))}
@@ -431,7 +451,7 @@ const App: React.FC = () => {
                         />
                     ))}
 
-                {localityMarkers.map((m, index) => (
+                {!showPosts && localityMarkers.map((m, index) => (
                     <Marker
                         key={`locality-${index}`}
                         position={{ lat: m.lat, lng: m.lng }}
@@ -445,15 +465,27 @@ const App: React.FC = () => {
                     />
                 ))}
 
-                    {selectedMarker && infoWindowVisible && (
+                    {selectedMarker  && (
                         <InfoWindowF
                             position={{ lat: selectedMarker.lat, lng: selectedMarker.lng }}
-                            onCloseClick={() => { setSelectedMarker(null); setViewing(false); setInfoWindowVisible(false); }}
+                            onCloseClick={() => { setSelectedMarker(null); setViewing(false); setInfoWindowVisible(false); setNearbyIndex(0)}}
                         >
                             <div style={{width:"20vw", maxHeight:"40vh"}}>
-                                <button onClick={() => { setViewing(true); setViewedMarker(selectedMarker); setViewedArticles(newsArticles)}}>show details</button>
-                                <h3>{selectedMarker.name}</h3>
-                                {!showPosts?<NewsTitles articles={newsArticles} /> : <div>{selectedMarker.content}</div>}{/* Display news articles in InfoWindow */}
+                                <button onClick={() => { setViewing(!viewing); setViewedMarker(selectedMarker); setViewedArticles(newsArticles)}}>show details</button>
+                                {!showPosts?<><h3>{selectedMarker.name}</h3><NewsTitles articles={newsArticles} /> </>: null}{/* Display news articles in InfoWindow */}
+                                {showPosts?
+                                <div style={{display:'flex', flexDirection:'column', alignItems:'center'}}>
+                                  <div>{nearbyMarkers.length + " post" + (nearbyMarkers.length>1?'s':'')}</div>
+                                  <div style={{display:'flex', overflow:'hidden', flexDirection:'column'}}>
+                                    <h3>{nearbyMarkers[nearbyIndex].name}</h3>
+                                    <div>{nearbyMarkers[nearbyIndex].content}</div>
+                                  </div>
+                                  <div style={{padding:'10px', display:'flex', flexDirection:'row'}}>
+                                    <div style={{marginRight:"15vw"}} onClick={() => setNearbyIndex(Math.max(0, nearbyIndex-1))}><ArrowBackIosNewIcon style={{color:nearbyIndex > 0?'blue':'black'}}/></div>
+                                    <div onClick={() => setNearbyIndex(Math.min(nearbyMarkers.length-1, nearbyIndex+1))}><ArrowForwardIosIcon style={{color:nearbyIndex < nearbyMarkers.length-1?'blue':'black'}}/></div>
+                                  </div>
+                                </div>
+                                :null}
                             </div>
                         </InfoWindowF>
                     )}
@@ -463,21 +495,35 @@ const App: React.FC = () => {
                 <div
                     style={{
                         position: 'absolute',
-                        top: '5vh',
-                        right: viewing ? '5vw' : '-40vw',
+                        top: '10vh',
+                        right: viewing ? '1vw' : '-40vw',
                         backgroundColor: 'white',
                         padding: 10,
                         height: '80vh',
                         width: '30vw',
-                        overflowY: 'scroll',
                         color: "black",
                         transition: '1s',
+                        borderRadius:'10px'
                     }}
                 >
-                    <button onClick={() => setViewing(false)}>exit</button>
-                    <h3>{viewedMarker?.name}</h3>
+                  <div style={{overflowY:'auto', height:'100%'}}>
+                  <button onClick={() => setViewing(false)}>exit</button>
+                    {
+                      showPosts? <>
+                        {nearbyMarkers.map((m) => {
+                          return (<div>
+                            <div>{m.name}</div>
+                            <div>{m.content}</div>
+                          </div>)
+                        })}
+                      </>:
+                      <>
+                      <h3>{viewedMarker?.name}</h3>
                     <p>{viewedMarker?.content}</p>
                     <NewsApp articles={viewedArticles} /> {/* Pass news articles to NewsApp */}
+                      </>
+                    }
+                  </div>
                 </div>
             </div>
         ) : (
