@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import { mapOptions, stateCenters } from './MapOptions.ts'; // Import the options and state centers
+import {stateNameToAbbreviation} from "./MapOptions.ts";
 import NewsApp from './news'; // Import NewsApp component
 import axios from 'axios'; // Import axios for fetching news
 import './App.css';
@@ -30,63 +31,6 @@ const statePlaces = stateCenters.map((sc) => {
     } as Place
 });
 
-// Function to convert full state name to abbreviation
-const stateNameToAbbreviation = (stateName: string) => {
-    const states: { [key: string]: string } = {
-        'Alabama': 'AL',
-        'Alaska': 'AK',
-        'Arizona': 'AZ',
-        'Arkansas': 'AR',
-        'California': 'CA',
-        'Colorado': 'CO',
-        'Connecticut': 'CT',
-        'Delaware': 'DE',
-        'Florida': 'FL',
-        'Georgia': 'GA',
-        'Hawaii': 'HI',
-        'Idaho': 'ID',
-        'Illinois': 'IL',
-        'Indiana': 'IN',
-        'Iowa': 'IA',
-        'Kansas': 'KS',
-        'Kentucky': 'KY',
-        'Louisiana': 'LA',
-        'Maine': 'ME',
-        'Maryland': 'MD',
-        'Massachusetts': 'MA',
-        'Michigan': 'MI',
-        'Minnesota': 'MN',
-        'Mississippi': 'MS',
-        'Missouri': 'MO',
-        'Montana': 'MT',
-        'Nebraska': 'NE',
-        'Nevada': 'NV',
-        'New Hampshire': 'NH',
-        'New Jersey': 'NJ',
-        'New Mexico': 'NM',
-        'New York': 'NY',
-        'North Carolina': 'NC',
-        'North Dakota': 'ND',
-        'Ohio': 'OH',
-        'Oklahoma': 'OK',
-        'Oregon': 'OR',
-        'Pennsylvania': 'PA',
-        'Rhode Island': 'RI',
-        'South Carolina': 'SC',
-        'South Dakota': 'SD',
-        'Tennessee': 'TN',
-        'Texas': 'TX',
-        'Utah': 'UT',
-        'Vermont': 'VT',
-        'Virginia': 'VA',
-        'Washington': 'WA',
-        'West Virginia': 'WV',
-        'Wisconsin': 'WI',
-        'Wyoming': 'WY'
-    };
-    return states[stateName] || '';
-};
-
 // Function to get the date string from the slider value
 const getDateFromSliderValue = (value: number) => {
     const today = new Date();
@@ -113,7 +57,6 @@ const App: React.FC = () => {
     const [center, setCenter] = useState({ lat: 39.8283, lng: -98.5795 });
     const [zoom, setZoom] = useState(4);  // Initialize zoom level
     const [map, setMap] = useState<google.maps.Map | null>(null);  // Store map instance
-    const [markers, setMarkers] = useState<Place[]>(statePlaces);
     const [viewing, setViewing] = useState<boolean>(false);
     const [viewedMarker, setViewedMarker] = useState<Place | null>(null);
     const [newsArticles, setNewsArticles] = useState<any[]>([]); // State to store news articles
@@ -121,7 +64,6 @@ const App: React.FC = () => {
     const [totalQueries, setTotalQueries] = useState(0); // State to store total query count
     const [sliderValue, setSliderValue] = useState(30); // State to store slider value, start at 30 (today's date)
     const cache = useRef<{ [key: string]: any[] }>({}); // Cache to store fetched news articles
-    const mapRef = useRef(null);
 
     // Handle zoom changes
     const onZoomChanged = useCallback(() => {
@@ -236,8 +178,9 @@ const App: React.FC = () => {
                 zoom={zoom}  // Adjust zoom level to show the states
                 options={mapOptions}  // Pass map options (e.g., disable controls, etc.)
                 onLoad={onLoad}  // Handle map load event to get map instance
+                onZoomChanged={() => setZoom(map?.getZoom())}
             >
-                {markers.map((m) => (
+                {statePlaces.map((m) => (
                     <Marker
                         key={m.name}
                         position={{ lat: m.lat, lng: m.lng }}
@@ -245,8 +188,8 @@ const App: React.FC = () => {
                         onClick={() => {
                             setSelectedMarker(m);
                             fetchNews(m.name); // Fetch news for the selected marker
-                            setCenter({ lat: m.lat, lng: m.lng }); // Center the map on the selected marker
-                            setZoom(8); // Zoom in to the selected marker
+                            setCenter({ lat: m.lat, lng: m.lng });
+                            setZoom(8);
                         }}  // Set the selected state on marker click
                     />
                 ))}
